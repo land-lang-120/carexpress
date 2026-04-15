@@ -5,46 +5,148 @@ function ProfileScreen() {
   const [subScreen, setSubScreen] = useState(null);
   const [notifEnabled, setNotifEnabled] = useState({ trips:true, promo:true, security:false, messages:true });
   const [toast, setToast] = useState(null);
+  const [userRole] = useState("driver"); // "driver" or "passenger"
+
+  // Document states: verified, pending, expired, none
+  const [docs, setDocs] = useState([
+    { label:"Carte Nationale d'Identité (CNI)", status:"verified", icon:"🪪",  expiry:"15 Mar 2028", role:"both" },
+    { label:"Permis de conduire",               status:"verified", icon:"🚗",  expiry:"20 Jan 2027", role:"driver" },
+    { label:"Carte grise du véhicule",           status:"pending",  icon:"📄",  expiry:null,          role:"driver" },
+    { label:"Visite technique",                  status:"expired",  icon:"🔧",  expiry:"01 Fév 2026", role:"driver" },
+    { label:"Assurance véhicule",                status:"none",     icon:"🛡️", expiry:null,          role:"driver" },
+    { label:"Photo du véhicule",                 status:"none",     icon:"📸",  expiry:null,          role:"driver" },
+    { label:"Selfie avec CNI (Chauffeur)",       status:"verified", icon:"🤳",  expiry:null,          role:"driver" },
+    { label:"Selfie avec CNI (Passager)",        status:"none",     icon:"🤳",  expiry:null,          role:"passenger" },
+  ]);
+
+  const hasExpired = docs.some(d => d.status === "expired");
+  const allDriverVerified = docs.filter(d=>d.role==="driver"||d.role==="both").every(d=>d.status==="verified");
+  const passengerVerified = docs.find(d=>d.label.includes("Passager"))?.status === "verified"
+    && docs.find(d=>d.label==="Carte Nationale d'Identité (CNI)")?.status === "verified";
+
+  const statusLabel = s => {
+    if (s==="verified") return "✓ Vérifié";
+    if (s==="pending")  return "⏳ En cours de vérification";
+    if (s==="expired")  return "⚠ Document périmé";
+    return "Non soumis";
+  };
+  const statusColor = s => {
+    if (s==="verified") return C.greenDark;
+    if (s==="pending")  return "#D97706";
+    if (s==="expired")  return C.danger;
+    return C.textLight;
+  };
+  const borderColor = s => {
+    if (s==="verified") return "#A7F3D0";
+    if (s==="expired")  return "#FECACA";
+    return C.border;
+  };
 
   // ─── Verify Profile Sub-screen ───
-  if (subScreen === "verify") return (
-    <div style={{ animation:"fadeUp .3s ease" }}>
-      <PageHdr title="Vérification du profil" sub="Documents requis" onBack={()=>setSubScreen(null)}/>
-      <Card style={{ padding:16,marginBottom:12 }}>
-        <p style={{ fontSize:13,color:C.textSec,lineHeight:1.6,marginBottom:16 }}>
-          Pour devenir <strong style={{ color:C.text }}>Chauffeur Vérifié ✓</strong>, transmettez les documents suivants. Votre statut sera mis à jour sous 24-48h.
-        </p>
-        {[
-          { label:"Carte Nationale d'Identité (CNI)", status:"verified", icon:"🪪" },
-          { label:"Permis de conduire",               status:"verified", icon:"🚗" },
-          { label:"Carte grise du véhicule",           status:"pending",  icon:"📄" },
-          { label:"Visite technique",                  status:"pending",  icon:"🔧" },
-          { label:"Assurance véhicule",                status:"none",     icon:"🛡️" },
-          { label:"Photo du véhicule",                 status:"none",     icon:"📸" },
-          { label:"Selfie avec CNI",                   status:"none",     icon:"🤳" },
-        ].map((doc,i)=>(
-          <div key={i} style={{ display:"flex",alignItems:"center",gap:12,padding:"13px 14px",background:C.bg,borderRadius:12,marginBottom:8,border:`1px solid ${doc.status==="verified"?"#A7F3D0":C.border}` }}>
-            <span style={{ fontSize:20 }}>{doc.icon}</span>
-            <div style={{ flex:1 }}>
-              <p style={{ fontSize:13,fontWeight:600,color:C.text }}>{doc.label}</p>
-              <p style={{ fontSize:11,color:doc.status==="verified"?C.greenDark:doc.status==="pending"?"#D97706":C.textLight,fontWeight:600,marginTop:2 }}>
-                {doc.status==="verified"?"✓ Vérifié":doc.status==="pending"?"⏳ En cours de vérification":"Non soumis"}
+  if (subScreen === "verify") {
+    const driverDocs = docs.filter(d=>d.role==="driver"||d.role==="both");
+    const passengerDocs = [
+      docs.find(d=>d.label==="Carte Nationale d'Identité (CNI)"),
+      docs.find(d=>d.label.includes("Passager")),
+    ].filter(Boolean);
+
+    return (
+      <div style={{ animation:"fadeUp .3s ease" }}>
+        <PageHdr title="Vérification du profil" sub="Documents requis" onBack={()=>setSubScreen(null)}/>
+
+        {hasExpired && (
+          <div style={{ display:"flex",gap:10,alignItems:"flex-start",padding:"13px 14px",background:C.dangerBg,borderRadius:13,border:"1px solid #FECACA",marginBottom:12 }}>
+            <span style={{ color:C.danger,display:"flex",flexShrink:0 }}>{Ic.warn}</span>
+            <div>
+              <p style={{ fontWeight:700,fontSize:13,color:C.danger }}>Document(s) périmé(s)</p>
+              <p style={{ fontSize:12,color:"#B91C1C",marginTop:3,lineHeight:1.5 }}>
+                Un ou plusieurs documents ont expiré. Votre statut <strong>Vérifié</strong> est suspendu jusqu'au renouvellement.
               </p>
             </div>
-            {doc.status==="none"&&(
-              <button style={{ padding:"7px 14px",borderRadius:10,border:"none",background:C.dark,color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
-                Envoyer
-              </button>
+          </div>
+        )}
+
+        {/* Driver Documents */}
+        <Card style={{ padding:16,marginBottom:12 }}>
+          <div style={{ display:"flex",alignItems:"center",gap:8,marginBottom:14 }}>
+            <span style={{ fontSize:16 }}>🚗</span>
+            <p style={{ fontWeight:800,fontSize:14,color:C.text }}>Documents Chauffeur</p>
+            {allDriverVerified && !hasExpired ? (
+              <span style={{ marginLeft:"auto",fontSize:11,fontWeight:700,color:C.green,background:C.greenBg,border:"1px solid #A7F3D0",padding:"2px 10px",borderRadius:20 }}>✓ Complet</span>
+            ) : (
+              <span style={{ marginLeft:"auto",fontSize:11,fontWeight:700,color:hasExpired?C.danger:"#D97706",background:hasExpired?C.dangerBg:"#FFFBEB",border:`1px solid ${hasExpired?"#FECACA":"#FDE68A"}`,padding:"2px 10px",borderRadius:20 }}>{hasExpired?"Suspendu":"Incomplet"}</span>
             )}
           </div>
-        ))}
-      </Card>
-      <div style={{ display:"flex",gap:10,alignItems:"flex-start",padding:"12px 14px",background:C.greenBg,borderRadius:13,border:`1px solid #A7F3D0` }}>
-        <span style={{ color:C.green,display:"flex",flexShrink:0 }}>{Ic.shield}</span>
-        <p style={{ fontSize:12,color:C.textSec,lineHeight:1.6 }}>Vos documents sont traités de manière confidentielle et ne sont jamais partagés avec les passagers.</p>
+          <p style={{ fontSize:12,color:C.textSec,lineHeight:1.6,marginBottom:14 }}>
+            Pour devenir <strong style={{ color:C.text }}>Chauffeur Vérifié ✓</strong>, transmettez tous les documents ci-dessous. Statut mis à jour sous 24-48h.
+          </p>
+          {driverDocs.map((doc,i)=>(
+            <div key={i} style={{ display:"flex",alignItems:"center",gap:12,padding:"13px 14px",background:doc.status==="expired"?C.dangerBg:C.bg,borderRadius:12,marginBottom:8,border:`1px solid ${borderColor(doc.status)}` }}>
+              <span style={{ fontSize:20 }}>{doc.icon}</span>
+              <div style={{ flex:1 }}>
+                <p style={{ fontSize:13,fontWeight:600,color:C.text }}>{doc.label}</p>
+                <p style={{ fontSize:11,color:statusColor(doc.status),fontWeight:600,marginTop:2 }}>
+                  {statusLabel(doc.status)}
+                </p>
+                {doc.expiry && (
+                  <p style={{ fontSize:10,color:doc.status==="expired"?C.danger:C.textLight,marginTop:2 }}>
+                    {doc.status==="expired"?"Expiré le":"Expire le"} {doc.expiry}
+                  </p>
+                )}
+              </div>
+              {(doc.status==="none"||doc.status==="expired")&&(
+                <button style={{ padding:"7px 14px",borderRadius:10,border:"none",background:doc.status==="expired"?C.danger:C.dark,color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
+                  {doc.status==="expired"?"Renouveler":"Envoyer"}
+                </button>
+              )}
+            </div>
+          ))}
+        </Card>
+
+        {/* Passenger Documents */}
+        <Card style={{ padding:16,marginBottom:12 }}>
+          <div style={{ display:"flex",alignItems:"center",gap:8,marginBottom:14 }}>
+            <span style={{ fontSize:16 }}>👤</span>
+            <p style={{ fontWeight:800,fontSize:14,color:C.text }}>Vérification Passager</p>
+            {passengerVerified ? (
+              <span style={{ marginLeft:"auto",fontSize:11,fontWeight:700,color:C.green,background:C.greenBg,border:"1px solid #A7F3D0",padding:"2px 10px",borderRadius:20 }}>✓ Vérifié</span>
+            ) : (
+              <span style={{ marginLeft:"auto",fontSize:11,fontWeight:700,color:"#D97706",background:"#FFFBEB",border:"1px solid #FDE68A",padding:"2px 10px",borderRadius:20 }}>Non vérifié</span>
+            )}
+          </div>
+          <p style={{ fontSize:12,color:C.textSec,lineHeight:1.6,marginBottom:14 }}>
+            Pour la <strong style={{ color:C.text }}>sécurité des chauffeurs</strong>, les passagers doivent aussi vérifier leur identité avec un selfie tenant leur CNI à côté de leur visage.
+          </p>
+          {passengerDocs.map((doc,i)=>(
+            <div key={i} style={{ display:"flex",alignItems:"center",gap:12,padding:"13px 14px",background:C.bg,borderRadius:12,marginBottom:8,border:`1px solid ${borderColor(doc.status)}` }}>
+              <span style={{ fontSize:20 }}>{doc.icon}</span>
+              <div style={{ flex:1 }}>
+                <p style={{ fontSize:13,fontWeight:600,color:C.text }}>{doc.label}</p>
+                <p style={{ fontSize:11,color:statusColor(doc.status),fontWeight:600,marginTop:2 }}>
+                  {statusLabel(doc.status)}
+                </p>
+              </div>
+              {doc.status==="none"&&(
+                <button style={{ padding:"7px 14px",borderRadius:10,border:"none",background:C.dark,color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
+                  Envoyer
+                </button>
+              )}
+            </div>
+          ))}
+        </Card>
+
+        {/* Info boxes */}
+        <div style={{ display:"flex",gap:10,alignItems:"flex-start",padding:"12px 14px",background:C.greenBg,borderRadius:13,border:"1px solid #A7F3D0",marginBottom:10 }}>
+          <span style={{ color:C.green,display:"flex",flexShrink:0 }}>{Ic.shield}</span>
+          <p style={{ fontSize:12,color:C.textSec,lineHeight:1.6 }}>Vos documents sont traités de manière confidentielle et ne sont jamais partagés avec les autres utilisateurs.</p>
+        </div>
+        <div style={{ display:"flex",gap:10,alignItems:"flex-start",padding:"12px 14px",background:"#FFFBEB",borderRadius:13,border:"1px solid #FDE68A" }}>
+          <span style={{ color:"#D97706",display:"flex",flexShrink:0 }}>{Ic.clock}</span>
+          <p style={{ fontSize:12,color:C.textSec,lineHeight:1.6 }}>Les documents périmés entraînent la <strong style={{ color:C.text }}>suspension automatique</strong> du statut Vérifié. Renouvelez-les pour restaurer votre badge.</p>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 
   // ─── Notifications Sub-screen ───
   if (subScreen === "notifs") return (
@@ -155,13 +257,16 @@ function ProfileScreen() {
         <div>
           <div style={{ display:"flex",gap:7,alignItems:"center",marginBottom:4 }}>
             <span style={{ fontWeight:800,fontSize:19,color:C.text }}>Konan Martin</span>
-            <VerBadge verified={true}/>
+            <VerBadge verified={!hasExpired && allDriverVerified}/>
           </div>
           <p style={{ fontSize:13,color:C.textSec }}>+237 677 123 456</p>
+          {hasExpired && (
+            <p style={{ fontSize:11,color:C.danger,fontWeight:700,marginTop:3 }}>⚠ Vérification suspendue — document périmé</p>
+          )}
         </div>
       </div>
 
-      <Card style={{ padding:18,marginBottom:12,border:`1.5px solid #A7F3D0` }}>
+      <Card style={{ padding:18,marginBottom:12,border:`1.5px solid ${hasExpired?"#FECACA":"#A7F3D0"}` }}>
         <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:13 }}>
           <div>
             <p style={{ fontSize:11,color:C.textSec,fontWeight:600,textTransform:"uppercase",letterSpacing:.5,marginBottom:5 }}>Points CarExpress</p>
@@ -186,6 +291,22 @@ function ProfileScreen() {
           </Card>
         ))}
       </div>
+
+      {/* Expired document alert on main profile */}
+      {hasExpired && (
+        <Card style={{ padding:14,marginBottom:12,border:"1.5px solid #FECACA",background:C.dangerBg }}>
+          <div style={{ display:"flex",gap:10,alignItems:"center" }}>
+            <span style={{ color:C.danger,display:"flex",flexShrink:0 }}>{Ic.warn}</span>
+            <div style={{ flex:1 }}>
+              <p style={{ fontWeight:700,fontSize:13,color:C.danger }}>Document périmé</p>
+              <p style={{ fontSize:12,color:"#B91C1C",marginTop:2 }}>Renouvelez vos documents pour restaurer votre badge Vérifié.</p>
+            </div>
+            <button onClick={()=>setSubScreen("verify")} style={{ padding:"7px 14px",borderRadius:10,border:"none",background:C.danger,color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
+              Voir
+            </button>
+          </div>
+        </Card>
+      )}
 
       <Card style={{ padding:16,marginBottom:12 }}>
         <div style={{ display:"flex",alignItems:"center",gap:8,marginBottom:13 }}>
@@ -220,6 +341,7 @@ function ProfileScreen() {
               onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
               <span style={{ color:color||C.textSec,display:"flex" }}>{icon}</span>
               <span style={{ flex:1,fontSize:14,fontWeight:600,color:color||C.text }}>{label}</span>
+              {label==="Vérifier mon profil"&&hasExpired&&<span style={{ width:8,height:8,borderRadius:4,background:C.danger,flexShrink:0 }}/>}
               <span style={{ color:C.textLight,fontSize:15 }}>›</span>
             </div>
             {i<arr.length-1&&<div style={{ height:1,background:C.border }}/>}
