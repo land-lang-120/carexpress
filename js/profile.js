@@ -18,7 +18,10 @@ function ProfileScreen() {
           { label:"Carte Nationale d'Identité (CNI)", status:"verified", icon:"🪪" },
           { label:"Permis de conduire",               status:"verified", icon:"🚗" },
           { label:"Carte grise du véhicule",           status:"pending",  icon:"📄" },
+          { label:"Visite technique",                  status:"pending",  icon:"🔧" },
+          { label:"Assurance véhicule",                status:"none",     icon:"🛡️" },
           { label:"Photo du véhicule",                 status:"none",     icon:"📸" },
+          { label:"Selfie avec CNI",                   status:"none",     icon:"🤳" },
         ].map((doc,i)=>(
           <div key={i} style={{ display:"flex",alignItems:"center",gap:12,padding:"13px 14px",background:C.bg,borderRadius:12,marginBottom:8,border:`1px solid ${doc.status==="verified"?"#A7F3D0":C.border}` }}>
             <span style={{ fontSize:20 }}>{doc.icon}</span>
