@@ -372,7 +372,7 @@ function HomeScreen({ setScreen }) {
 
 function DriverScreen({ onBack, onSubmit }) {
   const [step, setStep] = useState(1);
-  const [form, setForm] = useState({ from:"Yaoundé",to:"Douala",pickup:"",date:"",time:"06:00",seats:"3",wc:2,food:1,shop:0,luggage:{small:true,large:false,xlarge:false},price:"3500",pay:"all" });
+  const [form, setForm] = useState({ from:"Yaoundé",to:"Douala",pickup:"",date:"",time:"06:00",duration:"5h30",seats:"3",wc:2,food:1,shop:0,luggage:{small:true,large:false,xlarge:false},price:"3500",pay:"all" });
   const set = (k,v) => setForm(p=>({...p,[k]:v}));
   const STEPS = ["Itinéraire","Conditions","Tarif"];
 
@@ -387,6 +387,11 @@ function DriverScreen({ onBack, onSubmit }) {
       <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:11 }}>
         <Field label="Date"  icon={Ic.cal}   type="date" value={form.date} onChange={v=>set("date",v)}/>
         <Field label="Heure" icon={Ic.clock} type="time" value={form.time} onChange={v=>set("time",v)}/>
+      </div>
+      <div>
+        <Sel label="Durée estimée du trajet" icon={Ic.clock} value={form.duration} onChange={v=>set("duration",v)}
+          options={["2h00","2h30","3h00","3h30","4h00","4h30","5h00","5h30","6h00","6h30","7h00","8h00","9h00","10h00","12h00"].map(v=>({ value:v,label:v }))}/>
+        <p style={{ fontSize:11,color:C.textSec,marginTop:6,lineHeight:1.5,paddingLeft:2 }}>Estimez la durée en tenant compte du trafic habituel sur cette route.</p>
       </div>
       <Sel label="Places disponibles" icon={Ic.users} value={form.seats} onChange={v=>set("seats",v)}
         options={["1","2","3","4","5","6","7","8"].map(v=>({ value:v,label:`${v} place${v>1?"s":""}` }))}/>
@@ -451,7 +456,7 @@ function DriverScreen({ onBack, onSubmit }) {
           </div>
         )}
         <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:8 }}>
-          {[["Départ",form.time],["Places",form.seats],["Prix",`${fmt(+form.price)} FCFA`],["Paiement",plab(form.pay)]].map(([l,v])=>(
+          {[["Départ",form.time],["Durée",form.duration],["Places",form.seats],["Prix",`${fmt(+form.price)} FCFA`],["Paiement",plab(form.pay)]].map(([l,v])=>(
             <div key={l} style={{ padding:"9px 11px",background:C.card,borderRadius:10,border:`1px solid ${C.border}` }}>
               <p style={{ fontSize:10,color:C.textSec,fontWeight:600 }}>{l}</p>
               <p style={{ fontSize:13,fontWeight:700,color:C.text,marginTop:2 }}>{v}</p>
@@ -1324,10 +1329,89 @@ function NotificationsScreen({ onBack }) {
 /* ═══ js/history.js ═══ */
 /* CarExpress — History Screen */
 
-function HistoryScreen() {
+function HistoryScreen({ activeTrip, arrived, onCancelTrip }) {
+  const hasActive = activeTrip && !arrived;
+
   return (
     <div style={{ animation:"fadeUp .3s ease" }}>
-      <PageHdr title="Historique" sub={`${HISTORY.length} trajets`}/>
+      <PageHdr title="Historique" sub={hasActive ? "1 trajet en cours" : `${HISTORY.length} trajets`}/>
+
+      {/* Active / In-progress trip */}
+      {activeTrip && (
+        <div style={{ marginBottom:16 }}>
+          <p style={{ fontSize:11,fontWeight:700,color:C.textSec,textTransform:"uppercase",letterSpacing:.5,marginBottom:8,paddingLeft:2 }}>
+            {arrived ? "Trajet terminé (chat actif 24h)" : "En cours"}
+          </p>
+          <Card style={{ padding:0,border:`1.5px solid ${arrived?"#A7F3D0":C.green}`,overflow:"hidden" }}>
+            {/* Status bar */}
+            <div style={{ background:arrived?C.greenBg:`${C.green}12`,padding:"10px 16px",display:"flex",alignItems:"center",gap:8 }}>
+              {!arrived && <div style={{ width:8,height:8,borderRadius:4,background:C.green,animation:"pulse 1.5s ease-in-out infinite" }}/>}
+              <span style={{ fontSize:12,fontWeight:700,color:arrived?C.greenDark:C.green }}>
+                {arrived?"Arrivé à destination":"Trajet en cours"}
+              </span>
+              <span style={{ marginLeft:"auto",fontSize:11,color:C.textSec,fontWeight:600 }}>
+                Départ {activeTrip.dep} · Durée {activeTrip.dur}
+              </span>
+            </div>
+
+            <div style={{ padding:16 }}>
+              {/* Driver info */}
+              <div style={{ display:"flex",gap:11,alignItems:"center",marginBottom:12 }}>
+                <div style={{ width:42,height:42,borderRadius:12,background:C.dark,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:13,color:"#fff",flexShrink:0 }}>{activeTrip.ini}</div>
+                <div style={{ flex:1 }}>
+                  <div style={{ display:"flex",alignItems:"center",gap:6 }}>
+                    <span style={{ fontWeight:800,fontSize:14,color:C.text }}>{activeTrip.name}</span>
+                    <VerBadge verified={activeTrip.verified}/>
+                  </div>
+                  <p style={{ fontSize:12,color:C.textSec,marginTop:2 }}>{activeTrip.vehicle}</p>
+                </div>
+              </div>
+
+              {/* Route */}
+              <div style={{ display:"flex",alignItems:"center",gap:8,padding:"10px 12px",background:C.bg,borderRadius:10,marginBottom:12 }}>
+                <span style={{ fontWeight:700,fontSize:13,color:C.text }}>{activeTrip.from}</span>
+                <div style={{ flex:1,height:1,background:C.border }}/>
+                <span style={{ fontSize:11,color:C.textSec }}>{activeTrip.dur}</span>
+                <div style={{ flex:1,height:1,background:C.border }}/>
+                <span style={{ fontWeight:700,fontSize:13,color:C.text }}>{activeTrip.to}</span>
+              </div>
+
+              {/* Price + role */}
+              <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:hasActive?12:0 }}>
+                <span style={{ fontWeight:800,fontSize:15,color:C.text }}>{fmt(activeTrip.price)} FCFA</span>
+                <span style={{ padding:"3px 10px",borderRadius:20,fontSize:11,fontWeight:700,
+                  background:activeTrip.role==="driver"?"#EFF6FF":"#F0FBF4",
+                  color:activeTrip.role==="driver"?"#3B82F6":C.greenDark,
+                  border:`1px solid ${activeTrip.role==="driver"?"#BFDBFE":"#A7F3D0"}` }}>
+                  {activeTrip.role==="driver"?"Chauffeur":"Passager"}
+                </span>
+              </div>
+
+              {/* Action buttons — only if not arrived */}
+              {hasActive && (
+                <div style={{ display:"flex",gap:9,marginTop:4 }}>
+                  <Btn variant="outline" full onClick={onCancelTrip} style={{ borderRadius:12,flex:1 }}>
+                    Voir les détails
+                  </Btn>
+                </div>
+              )}
+
+              {/* Arrived info */}
+              {arrived && (
+                <div style={{ display:"flex",gap:8,alignItems:"center",padding:"10px 12px",background:C.greenBg,borderRadius:10,marginTop:10,border:"1px solid #A7F3D0" }}>
+                  <span style={{ color:C.green,display:"flex" }}>{Ic.chat}</span>
+                  <p style={{ fontSize:12,color:C.textSec,lineHeight:1.5 }}>
+                    Le chat reste ouvert <strong style={{ color:C.text }}>24h</strong> pour contacter le {activeTrip.role==="driver"?"passager":"chauffeur"} en cas de perte d'objet.
+                  </p>
+                </div>
+              )}
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* Past trips */}
+      <p style={{ fontSize:11,fontWeight:700,color:C.textSec,textTransform:"uppercase",letterSpacing:.5,marginBottom:8,paddingLeft:2 }}>Trajets passés</p>
       <div style={{ display:"flex",flexDirection:"column",gap:10 }}>
         {HISTORY.map(h=>(
           <Card key={h.id} style={{ padding:"14px 16px" }}>
@@ -2316,14 +2400,35 @@ function App() {
   const [results,   setResults]  = useState([]);
   const [activeTrip,setActiveTrip]= useState(null);
   const [bookedAt,  setBookedAt] = useState(null);
+  const [arrived,   setArrived]  = useState(false);
   const [mapOpen,   setMapOpen]  = useState(false);
   const [toast,     setToast]    = useState(null);
   const [cancelOpen,setCancelOpen]= useState(false);
   const [notifsOpen,setNotifsOpen]= useState(false);
 
   // Policy dialog state (show once per role)
-  const [policyDialog, setPolicyDialog] = useState(null); // "passenger" or "driver"
-  const [pendingAction, setPendingAction] = useState(null); // callback after accept
+  const [policyDialog, setPolicyDialog] = useState(null);
+  const [pendingAction, setPendingAction] = useState(null);
+
+  // Simulate arrival after trip duration
+  useEffect(() => {
+    if (!activeTrip || !bookedAt || arrived) return;
+    // Parse duration in minutes from trip.dur (e.g. "5h30" → 330 min)
+    const dur = activeTrip.dur || "5h00";
+    const hMatch = dur.match(/(\d+)h/), mMatch = dur.match(/h(\d+)/);
+    const totalMin = ((hMatch ? +hMatch[1] : 0) * 60) + (mMatch ? +mMatch[1] : 0);
+    // For demo: simulate arrival after 2 min (real would be totalMin * 60000)
+    const demoMs = 120000;
+    const t = setTimeout(() => {
+      setArrived(true);
+      setMapOpen(false);
+      setToast("Vous êtes arrivé à destination !");
+    }, demoMs);
+    return () => clearTimeout(t);
+  }, [activeTrip, bookedAt, arrived]);
+
+  // After arrival, auto-clear trip after 24h (chat stays via bookedAt)
+  // In real app this would be server-driven
 
   const checkPolicy = (role, action) => {
     const key = `ce_policy_${role}`;
@@ -2351,6 +2456,7 @@ function App() {
     checkPolicy("passenger", () => {
       setActiveTrip({ ...d, role:"passenger" });
       setBookedAt(Date.now());
+      setArrived(false);
       setScreen("home");
       setTab("home");
       setToast(`Réservé · ${d.from} → ${d.to}`);
@@ -2366,12 +2472,13 @@ function App() {
         verified: true,
         role: "driver",
         from: form.from, to: form.to,
-        dep: form.time, dur: "—",
+        dep: form.time, dur: form.duration || "5h00",
         price: +form.price || 0,
         pickup: form.pickup,
       };
       setActiveTrip(synthetic);
       setBookedAt(Date.now());
+      setArrived(false);
       setScreen("home");
       setToast("Trajet publié ! Vos boutons de suivi sont actifs.");
     });
@@ -2381,7 +2488,9 @@ function App() {
     const role = activeTrip?.role || "passenger";
     setActiveTrip(null);
     setBookedAt(null);
+    setArrived(false);
     setCancelOpen(false);
+    setTab("history");
     if (penalty) {
       setToast(role === "passenger"
         ? "Trajet annulé — sanctions appliquées"
@@ -2397,10 +2506,10 @@ function App() {
       return <NotificationsScreen onBack={()=>setNotifsOpen(false)}/>;
     }
     if (cancelOpen && activeTrip) {
-      return <CancelTripScreen trip={activeTrip} role={activeTrip.role||"passenger"} onBack={()=>setCancelOpen(false)} onConfirmCancel={handleCancelTrip}/>;
+      return <CancelTripScreen trip={activeTrip} role={activeTrip.role||"passenger"} onBack={()=>{setCancelOpen(false);setTab("history");}} onConfirmCancel={handleCancelTrip}/>;
     }
     if (tab !== "home") {
-      if (tab==="history")    return <HistoryScreen/>;
+      if (tab==="history")    return <HistoryScreen activeTrip={activeTrip} arrived={arrived} onCancelTrip={()=>setCancelOpen(true)}/>;
       if (tab==="favorites")  return <FavoritesScreen setTab={setTab}/>;
       if (tab==="profile")    return <ProfileScreen/>;
     }
@@ -2409,6 +2518,11 @@ function App() {
     if (screen==="results")   return <ResultsScreen onBack={()=>setScreen("passenger")} results={results} onBook={handleBook}/>;
     return <HomeScreen setScreen={s=>{ setTab("home"); setScreen(s); }}/>;
   };
+
+  // Show map button only if trip active and NOT arrived
+  const showMap = activeTrip && bookedAt && !arrived && tab === "home" && screen === "home";
+  // Show chat if trip exists and within 24h window (even after arrival)
+  const showChat = activeTrip && bookedAt && tab === "home" && screen === "home";
 
   return (
     <div style={{ display:"flex",justifyContent:"center",background:"#DCDFE4",minHeight:"100vh" }}>
@@ -2439,22 +2553,16 @@ function App() {
           {render()}
         </div>
         <BottomNav tab={tab} setTab={t=>{ setTab(t); if(t==="home") setScreen("home"); setCancelOpen(false); setNotifsOpen(false); }}/>
-        {activeTrip && bookedAt && tab === "home" && screen === "home" && !cancelOpen && (
-          <>
-            <FloatingStack trip={activeTrip} bookedAt={bookedAt} onMapOpen={()=>setMapOpen(true)}/>
-            {/* Cancel trip floating button */}
-            <button onClick={()=>setCancelOpen(true)}
-              style={{ position:"fixed",left:18,bottom:82,zIndex:200,width:48,height:48,borderRadius:"50%",background:C.dangerBg,border:`1.5px solid #FECACA`,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:C.danger,boxShadow:"0 4px 16px rgba(239,68,68,0.2)",transition:"transform .2s",fontFamily:"'Plus Jakarta Sans',sans-serif" }}
-              onMouseEnter={e=>e.currentTarget.style.transform="scale(1.08)"}
-              onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}>
-              {Ic.close}
-            </button>
-            <div style={{ position:"fixed",left:72,bottom:94,zIndex:200,background:C.dark,color:"#fff",padding:"4px 10px",borderRadius:8,fontSize:11,fontWeight:600,pointerEvents:"none",whiteSpace:"nowrap" }}>
-              Annuler
-            </div>
-          </>
+
+        {/* Floating buttons: map only when not arrived, chat always within 24h */}
+        {showChat && (
+          <div style={{ position:"fixed",right:18,bottom:82,zIndex:200,display:"flex",flexDirection:"column",alignItems:"center",gap:10 }}>
+            {showMap && <FloatingMapButton onOpen={()=>setMapOpen(true)} trip={activeTrip}/>}
+            <FloatingChat trip={activeTrip} bookedAt={bookedAt}/>
+          </div>
         )}
-        {mapOpen && activeTrip && (
+
+        {mapOpen && activeTrip && !arrived && (
           <MapOverlay trip={activeTrip} onClose={()=>setMapOpen(false)}/>
         )}
         {toast && <Toast message={toast} onClose={()=>setToast(null)}/>}
