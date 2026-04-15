@@ -1,8 +1,12 @@
-/* CarExpress — Results & Driver Detail Screens */
+/* CarExpress — Results, Driver Detail & Booking Confirmation */
 
 function ResultsScreen({ onBack, results, onBook }) {
   const [sel,setSel]=useState(null);
-  if(sel!==null) return <DriverDetail driver={results[sel]} onBack={()=>setSel(null)} onBook={()=>onBook(results[sel])}/>;
+  const [booking,setBooking]=useState(null);
+
+  if(booking) return <BookingConfirm driver={booking} onBack={()=>setBooking(null)} onConfirm={()=>onBook(booking)}/>;
+  if(sel!==null) return <DriverDetail driver={results[sel]} onBack={()=>setSel(null)} onBook={()=>setBooking(results[sel])}/>;
+
   return (
     <div style={{ animation:"fadeUp .3s ease" }}>
       <PageHdr title="Trajets disponibles" sub={`${results[0]?.from||""} → ${results[0]?.to||""} · ${results.length} résultat${results.length>1?"s":""}`} onBack={onBack}/>
@@ -149,6 +153,159 @@ function DriverDetail({ driver:d, onBack, onBook }) {
       <Btn variant="green" full onClick={onBook} style={{ height:50,fontSize:14,borderRadius:13 }}>
         Réserver · {fmt(d.price)} FCFA
       </Btn>
+    </div>
+  );
+}
+
+// ─── BOOKING CONFIRMATION + PAYMENT SELECTION ────────────────────────────────
+function BookingConfirm({ driver:d, onBack, onConfirm }) {
+  const PAY_METHODS = [
+    { id:"card",   label:"Carte bancaire",    sub:"Visa, Mastercard",           icon:Ic.card,   color:"#3B82F6" },
+    { id:"momo",   label:"MTN Mobile Money",  sub:"Paiement via MTN MoMo",      icon:Ic.mobile, color:"#FBBF24" },
+    { id:"orange", label:"Orange Money",       sub:"Paiement via Orange Money",  icon:Ic.mobile, color:"#F97316" },
+    { id:"cash",   label:"Espèces",           sub:"Paiement en main propre",    icon:Ic.money,  color:C.textSec },
+  ];
+
+  // Filter methods based on driver's accepted payment
+  const available = d.pay === "all" || d.pay === "card"
+    ? PAY_METHODS
+    : d.pay === "momo"   ? PAY_METHODS.filter(p=>p.id==="momo"||p.id==="cash")
+    : d.pay === "orange" ? PAY_METHODS.filter(p=>p.id==="orange"||p.id==="cash")
+    : d.pay === "cash"   ? PAY_METHODS.filter(p=>p.id==="cash")
+    : PAY_METHODS;
+
+  const [payMethod, setPayMethod] = useState(available[0]?.id || "cash");
+  const [seats, setSeats] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
+  const maxSeats = d.seats || 3;
+  const total = (d.price || 0) * seats;
+
+  const handleConfirm = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      setConfirmed(true);
+      setTimeout(() => onConfirm(), 1800);
+    }, 1500);
+  };
+
+  // ─── Success Animation ───
+  if (confirmed) return (
+    <div style={{ animation:"fadeUp .3s ease",textAlign:"center",padding:"50px 20px" }}>
+      <div style={{ width:80,height:80,borderRadius:22,background:C.greenBg,border:"2px solid #A7F3D0",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 22px",animation:"pulse 1s ease infinite" }}>
+        <span style={{ fontSize:36 }}>✓</span>
+      </div>
+      <h3 style={{ fontWeight:800,fontSize:20,color:C.text,marginBottom:8 }}>Réservation confirmée !</h3>
+      <p style={{ fontSize:14,color:C.textSec,lineHeight:1.6,marginBottom:6 }}>{d.from} → {d.to}</p>
+      <p style={{ fontSize:13,color:C.textSec }}>Départ à {d.dep} avec {d.name}</p>
+      <p style={{ fontWeight:800,fontSize:22,color:C.green,marginTop:16 }}>{fmt(total)} FCFA</p>
+      <p style={{ fontSize:12,color:C.textSec,marginTop:4 }}>
+        {payMethod==="card"?"Carte bancaire":payMethod==="momo"?"MTN MoMo":payMethod==="orange"?"Orange Money":"Espèces"}
+      </p>
+    </div>
+  );
+
+  return (
+    <div style={{ animation:"fadeUp .3s ease" }}>
+      <PageHdr title="Confirmer la réservation" sub="Vérifiez et payez" onBack={onBack}/>
+
+      {/* Trip summary */}
+      <Card style={{ padding:16,marginBottom:12 }}>
+        <div style={{ display:"flex",gap:12,alignItems:"center",marginBottom:14 }}>
+          <div style={{ width:46,height:46,borderRadius:14,background:C.dark,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:15,color:"#fff",flexShrink:0 }}>{d.ini}</div>
+          <div style={{ flex:1 }}>
+            <div style={{ display:"flex",alignItems:"center",gap:6,marginBottom:3 }}>
+              <span style={{ fontWeight:800,fontSize:15,color:C.text }}>{d.name}</span>
+              <VerBadge verified={d.verified}/>
+            </div>
+            <p style={{ fontSize:12,color:C.textSec }}>{d.vehicle} · {d.plate}</p>
+          </div>
+        </div>
+        <div style={{ display:"flex",alignItems:"center",gap:8,padding:"10px 12px",background:C.bg,borderRadius:11,marginBottom:10 }}>
+          <span style={{ fontWeight:800,fontSize:14,color:C.text }}>{d.from}</span>
+          <div style={{ flex:1,height:1,background:C.border }}/>
+          <span style={{ fontSize:11,color:C.textSec,fontWeight:600 }}>{d.dur}</span>
+          <div style={{ flex:1,height:1,background:C.border }}/>
+          <span style={{ fontWeight:800,fontSize:14,color:C.text }}>{d.to}</span>
+        </div>
+        <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
+          <Chip>{d.dep}</Chip>
+          <Chip>{d.pickup?.split(",")[0] || "Point de RDV"}</Chip>
+        </div>
+      </Card>
+
+      {/* Number of seats */}
+      <Card style={{ padding:16,marginBottom:12 }}>
+        <p style={{ fontWeight:800,fontSize:13,color:C.text,marginBottom:12 }}>Nombre de places</p>
+        <div style={{ display:"flex",alignItems:"center",gap:14,justifyContent:"center" }}>
+          <button onClick={()=>setSeats(s=>Math.max(1,s-1))}
+            style={{ width:40,height:40,borderRadius:12,border:`1.5px solid ${seats<=1?C.border:C.dark}`,background:seats<=1?C.bg:C.card,cursor:seats<=1?"default":"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,fontWeight:700,color:seats<=1?C.textLight:C.dark,fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
+            −
+          </button>
+          <div style={{ textAlign:"center",minWidth:60 }}>
+            <p style={{ fontWeight:800,fontSize:28,color:C.text }}>{seats}</p>
+            <p style={{ fontSize:11,color:C.textSec,fontWeight:600 }}>place{seats>1?"s":""}</p>
+          </div>
+          <button onClick={()=>setSeats(s=>Math.min(maxSeats,s+1))}
+            style={{ width:40,height:40,borderRadius:12,border:`1.5px solid ${seats>=maxSeats?C.border:C.dark}`,background:seats>=maxSeats?C.bg:C.card,cursor:seats>=maxSeats?"default":"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,fontWeight:700,color:seats>=maxSeats?C.textLight:C.dark,fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
+            +
+          </button>
+        </div>
+        <p style={{ fontSize:12,color:C.textSec,textAlign:"center",marginTop:8 }}>{fmt(d.price)} FCFA × {seats} = <strong style={{ color:C.text }}>{fmt(total)} FCFA</strong></p>
+      </Card>
+
+      {/* Payment method selection */}
+      <Card style={{ padding:16,marginBottom:12 }}>
+        <p style={{ fontWeight:800,fontSize:13,color:C.text,marginBottom:12 }}>Mode de paiement</p>
+        <div style={{ display:"flex",flexDirection:"column",gap:8 }}>
+          {available.map(m=>(
+            <label key={m.id} onClick={()=>setPayMethod(m.id)}
+              style={{ display:"flex",alignItems:"center",gap:12,padding:"13px 14px",background:payMethod===m.id?C.greenBg:C.card,borderRadius:12,cursor:"pointer",border:`1.5px solid ${payMethod===m.id?"#A7F3D0":C.border}`,transition:"all .2s" }}>
+              <div style={{ width:38,height:38,borderRadius:11,background:payMethod===m.id?`${m.color}18`:C.bg,display:"flex",alignItems:"center",justifyContent:"center",color:m.color,flexShrink:0,border:`1px solid ${payMethod===m.id?m.color+"40":C.border}` }}>
+                {m.icon}
+              </div>
+              <div style={{ flex:1 }}>
+                <p style={{ fontWeight:700,fontSize:13,color:C.text }}>{m.label}</p>
+                <p style={{ fontSize:11,color:C.textSec,marginTop:1 }}>{m.sub}</p>
+              </div>
+              <div style={{ width:20,height:20,borderRadius:"50%",border:`2px solid ${payMethod===m.id?C.green:C.border}`,background:payMethod===m.id?C.green:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all .2s" }}>
+                {payMethod===m.id&&<div style={{ width:7,height:7,borderRadius:"50%",background:"#fff" }}/>}
+              </div>
+            </label>
+          ))}
+        </div>
+      </Card>
+
+      {/* Price breakdown */}
+      <Card style={{ padding:16,marginBottom:14,border:`1.5px solid #A7F3D0` }}>
+        <p style={{ fontWeight:800,fontSize:13,color:C.text,marginBottom:12 }}>Récapitulatif</p>
+        <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 0",borderBottom:`1px solid ${C.border}` }}>
+          <span style={{ fontSize:13,color:C.textSec }}>Trajet ({seats} place{seats>1?"s":""})</span>
+          <span style={{ fontWeight:700,fontSize:13,color:C.text }}>{fmt(total)} FCFA</span>
+        </div>
+        <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 0",borderBottom:`1px solid ${C.border}` }}>
+          <span style={{ fontSize:13,color:C.textSec }}>Frais CarExpress</span>
+          <span style={{ fontWeight:700,fontSize:13,color:C.green }}>Gratuit</span>
+        </div>
+        <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0 0" }}>
+          <span style={{ fontWeight:800,fontSize:15,color:C.text }}>Total</span>
+          <span style={{ fontWeight:800,fontSize:20,color:C.text }}>{fmt(total)} FCFA</span>
+        </div>
+      </Card>
+
+      {/* Confirm button */}
+      <Btn variant="green" full onClick={handleConfirm} disabled={loading} style={{ height:52,fontSize:15,borderRadius:14 }}>
+        {loading
+          ? <><span style={{ animation:"spin .8s linear infinite",display:"inline-block" }}>◌</span> Traitement...</>
+          : <>Confirmer et payer · {fmt(total)} FCFA</>
+        }
+      </Btn>
+
+      <p style={{ fontSize:11,color:C.textSec,textAlign:"center",marginTop:10,lineHeight:1.5 }}>
+        En confirmant, vous acceptez les conditions d'utilisation de CarExpress.
+        Annulation gratuite jusqu'à 1h avant le départ.
+      </p>
     </div>
   );
 }

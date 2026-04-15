@@ -22,7 +22,8 @@ const C = {
 };
 
 const PAYMENT_OPTS = [
-  { value:"all",    label:"Tout accepté",       sub:"MTN MoMo · Orange Money · Espèces" },
+  { value:"all",    label:"Tout accepté",       sub:"Carte · MTN MoMo · Orange Money · Espèces" },
+  { value:"card",   label:"Carte bancaire",     sub:"Visa, Mastercard — paiement sécurisé" },
   { value:"momo",   label:"MTN Mobile Money",   sub:"Paiement mobile MTN uniquement" },
   { value:"orange", label:"Orange Money",       sub:"Paiement mobile Orange uniquement" },
   { value:"cash",   label:"Espèces uniquement", sub:"Paiement en main propre" },
