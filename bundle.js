@@ -752,8 +752,151 @@ function FavoritesScreen({ setTab }) {
 
 function ProfileScreen() {
   const pts=270, next=300, disc=Math.floor((pts/next)*15);
+  const [subScreen, setSubScreen] = useState(null);
+  const [notifEnabled, setNotifEnabled] = useState({ trips:true, promo:true, security:false, messages:true });
+  const [toast, setToast] = useState(null);
+
+  // ─── Verify Profile Sub-screen ───
+  if (subScreen === "verify") return (
+    <div style={{ animation:"fadeUp .3s ease" }}>
+      <PageHdr title="Vérification du profil" sub="Documents requis" onBack={()=>setSubScreen(null)}/>
+      <Card style={{ padding:16,marginBottom:12 }}>
+        <p style={{ fontSize:13,color:C.textSec,lineHeight:1.6,marginBottom:16 }}>
+          Pour devenir <strong style={{ color:C.text }}>Chauffeur Vérifié ✓</strong>, transmettez les documents suivants. Votre statut sera mis à jour sous 24-48h.
+        </p>
+        {[
+          { label:"Carte Nationale d'Identité (CNI)", status:"verified", icon:"🪪" },
+          { label:"Permis de conduire",               status:"verified", icon:"🚗" },
+          { label:"Carte grise du véhicule",           status:"pending",  icon:"📄" },
+          { label:"Photo du véhicule",                 status:"none",     icon:"📸" },
+        ].map((doc,i)=>(
+          <div key={i} style={{ display:"flex",alignItems:"center",gap:12,padding:"13px 14px",background:C.bg,borderRadius:12,marginBottom:8,border:`1px solid ${doc.status==="verified"?"#A7F3D0":C.border}` }}>
+            <span style={{ fontSize:20 }}>{doc.icon}</span>
+            <div style={{ flex:1 }}>
+              <p style={{ fontSize:13,fontWeight:600,color:C.text }}>{doc.label}</p>
+              <p style={{ fontSize:11,color:doc.status==="verified"?C.greenDark:doc.status==="pending"?"#D97706":C.textLight,fontWeight:600,marginTop:2 }}>
+                {doc.status==="verified"?"✓ Vérifié":doc.status==="pending"?"⏳ En cours de vérification":"Non soumis"}
+              </p>
+            </div>
+            {doc.status==="none"&&(
+              <button style={{ padding:"7px 14px",borderRadius:10,border:"none",background:C.dark,color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
+                Envoyer
+              </button>
+            )}
+          </div>
+        ))}
+      </Card>
+      <div style={{ display:"flex",gap:10,alignItems:"flex-start",padding:"12px 14px",background:C.greenBg,borderRadius:13,border:`1px solid #A7F3D0` }}>
+        <span style={{ color:C.green,display:"flex",flexShrink:0 }}>{Ic.shield}</span>
+        <p style={{ fontSize:12,color:C.textSec,lineHeight:1.6 }}>Vos documents sont traités de manière confidentielle et ne sont jamais partagés avec les passagers.</p>
+      </div>
+    </div>
+  );
+
+  // ─── Notifications Sub-screen ───
+  if (subScreen === "notifs") return (
+    <div style={{ animation:"fadeUp .3s ease" }}>
+      <PageHdr title="Notifications" sub="Gérez vos alertes" onBack={()=>setSubScreen(null)}/>
+      <Card style={{ padding:0,marginBottom:12 }}>
+        {[
+          { key:"trips",    label:"Trajets & Réservations", desc:"Rappels de départ, confirmations" },
+          { key:"promo",    label:"Promotions & Points",    desc:"Offres spéciales, réductions" },
+          { key:"security", label:"Alertes de sécurité",    desc:"Mises à jour du trajet en cours" },
+          { key:"messages", label:"Messages chauffeur",     desc:"Discussions et ajustements" },
+        ].map((item,i,arr)=>(
+          <div key={item.key}>
+            <div style={{ display:"flex",alignItems:"center",gap:13,padding:"15px 16px" }}>
+              <div style={{ flex:1 }}>
+                <p style={{ fontSize:14,fontWeight:600,color:C.text }}>{item.label}</p>
+                <p style={{ fontSize:12,color:C.textSec,marginTop:2 }}>{item.desc}</p>
+              </div>
+              <button onClick={()=>setNotifEnabled(p=>({...p,[item.key]:!p[item.key]}))}
+                style={{ width:48,height:28,borderRadius:14,border:"none",cursor:"pointer",position:"relative",transition:"background .2s",
+                  background:notifEnabled[item.key]?C.green:C.border }}>
+                <div style={{ width:22,height:22,borderRadius:11,background:"#fff",position:"absolute",top:3,
+                  left:notifEnabled[item.key]?23:3,transition:"left .2s",boxShadow:"0 1px 3px rgba(0,0,0,0.2)" }}/>
+              </button>
+            </div>
+            {i<arr.length-1&&<div style={{ height:1,background:C.border,marginLeft:16,marginRight:16 }}/>}
+          </div>
+        ))}
+      </Card>
+      <Btn variant="green" full onClick={()=>{setSubScreen(null);setToast("Préférences sauvegardées");}}>
+        Enregistrer
+      </Btn>
+    </div>
+  );
+
+  // ─── Support Sub-screen ───
+  if (subScreen === "support") return (
+    <div style={{ animation:"fadeUp .3s ease" }}>
+      <PageHdr title="Support CarExpress" sub="Comment pouvons-nous vous aider ?" onBack={()=>setSubScreen(null)}/>
+      <Card style={{ padding:0,marginBottom:12 }}>
+        {[
+          { icon:"💬", label:"FAQ — Questions fréquentes",    desc:"Réponses aux questions courantes" },
+          { icon:"📧", label:"Envoyer un email",              desc:"support@carexpress.cm" },
+          { icon:"📞", label:"Appeler le support",            desc:"+237 233 00 00 00" },
+          { icon:"💡", label:"Signaler un problème",          desc:"Bug, comportement suspect, plainte" },
+        ].map((item,i,arr)=>(
+          <div key={i}>
+            <div style={{ display:"flex",alignItems:"center",gap:13,padding:"15px 16px",cursor:"pointer" }}
+              onClick={()=>{if(i===2)window.location.href="tel:+237233000000";}}>
+              <span style={{ fontSize:20 }}>{item.icon}</span>
+              <div style={{ flex:1 }}>
+                <p style={{ fontSize:14,fontWeight:600,color:C.text }}>{item.label}</p>
+                <p style={{ fontSize:12,color:C.textSec,marginTop:2 }}>{item.desc}</p>
+              </div>
+              <span style={{ color:C.textLight,fontSize:15 }}>›</span>
+            </div>
+            {i<arr.length-1&&<div style={{ height:1,background:C.border,marginLeft:16,marginRight:16 }}/>}
+          </div>
+        ))}
+      </Card>
+      <Card style={{ padding:16 }}>
+        <p style={{ fontSize:12,color:C.textSec,lineHeight:1.6,textAlign:"center" }}>
+          Disponible du lundi au samedi, 8h — 18h.<br/>
+          Temps de réponse moyen : <strong style={{ color:C.text }}>moins de 2h</strong>
+        </p>
+      </Card>
+    </div>
+  );
+
+  // ─── Logout Confirmation ───
+  if (subScreen === "logout") return (
+    <div style={{ animation:"fadeUp .3s ease" }}>
+      <PageHdr title="Déconnexion" onBack={()=>setSubScreen(null)}/>
+      <div style={{ textAlign:"center",padding:"40px 20px" }}>
+        <div style={{ width:70,height:70,borderRadius:20,background:C.dangerBg,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 20px",border:"1px solid #FECACA" }}>
+          <span style={{ fontSize:30 }}>👋</span>
+        </div>
+        <h3 style={{ fontWeight:800,fontSize:18,color:C.text,marginBottom:8 }}>Vous partez déjà ?</h3>
+        <p style={{ fontSize:14,color:C.textSec,lineHeight:1.6,marginBottom:28,maxWidth:280,margin:"0 auto 28px" }}>
+          Vous serez déconnecté de votre compte CarExpress. Vos données et points seront conservés.
+        </p>
+        <div style={{ display:"flex",flexDirection:"column",gap:10 }}>
+          <Btn variant="danger" full onClick={()=>{setSubScreen(null);setToast("Déconnecté avec succès");}}>
+            Confirmer la déconnexion
+          </Btn>
+          <Btn variant="outline" full onClick={()=>setSubScreen(null)}>
+            Annuler
+          </Btn>
+        </div>
+      </div>
+    </div>
+  );
+
+  // ─── Main Profile ───
+  const menuActions = {
+    "Vérifier mon profil": ()=>setSubScreen("verify"),
+    "Notifications":       ()=>setSubScreen("notifs"),
+    "Support CarExpress":  ()=>setSubScreen("support"),
+    "Déconnexion":         ()=>setSubScreen("logout"),
+  };
+
   return (
     <div style={{ animation:"fadeUp .3s ease" }}>
+      {toast && <Toast message={toast} onClose={()=>setToast(null)}/>}
+
       <div style={{ display:"flex",gap:13,alignItems:"center",marginBottom:22 }}>
         <div style={{ width:54,height:54,borderRadius:16,background:C.dark,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:19,color:"#fff" }}>KM</div>
         <div>
@@ -819,7 +962,9 @@ function ProfileScreen() {
       <Card style={{ marginBottom:20 }}>
         {[["Vérifier mon profil",Ic.shield,C.green],["Notifications",Ic.bell,null],["Support CarExpress",Ic.phone,null],["Déconnexion",Ic.user,C.danger]].map(([label,icon,color],i,arr)=>(
           <div key={label}>
-            <div style={{ display:"flex",alignItems:"center",gap:13,padding:"14px 16px",cursor:"pointer" }}>
+            <div onClick={menuActions[label]} style={{ display:"flex",alignItems:"center",gap:13,padding:"14px 16px",cursor:"pointer",transition:"background .15s" }}
+              onMouseEnter={e=>e.currentTarget.style.background=C.bg}
+              onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
               <span style={{ color:color||C.textSec,display:"flex" }}>{icon}</span>
               <span style={{ flex:1,fontSize:14,fontWeight:600,color:color||C.text }}>{label}</span>
               <span style={{ color:C.textLight,fontSize:15 }}>›</span>
@@ -1456,9 +1601,15 @@ function App() {
     <div style={{ display:"flex",justifyContent:"center",background:"#DCDFE4",minHeight:"100vh" }}>
       <div style={{ width:"100%",maxWidth:430,minHeight:"100vh",background:C.bg,position:"relative",fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
         <div style={{ padding:"10px 16px 0",display:"flex",justifyContent:"space-between",alignItems:"center",background:C.bg,position:"sticky",top:0,zIndex:50 }}>
-          <span style={{ fontWeight:800,fontSize:16,color:C.text,letterSpacing:-.3 }}>CarExpress</span>
-          <div style={{ display:"flex",alignItems:"center",gap:10 }}>
-            <span style={{ fontSize:11,fontWeight:600,color:C.textSec }}>🇨🇲</span>
+          <div style={{ display:"flex",alignItems:"center",gap:8 }}>
+            <svg width="26" height="26" viewBox="0 0 32 32" fill="none">
+              <rect width="32" height="32" rx="9" fill="#1F2937"/>
+              <path d="M8 20.5h16M10 17l2-6h8l2 6" stroke="#25D366" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <circle cx="12" cy="21" r="2" fill="#25D366"/><circle cx="20" cy="21" r="2" fill="#25D366"/>
+              <path d="M16 8v3" stroke="#25D366" strokeWidth="1.5" strokeLinecap="round"/>
+              <circle cx="16" cy="7" r="1.5" fill="#25D366"/>
+            </svg>
+            <span style={{ fontWeight:800,fontSize:16,color:C.text,letterSpacing:-.3 }}>CarExpress</span>
           </div>
         </div>
         <div style={{ padding:"16px 16px 96px",overflowY:"auto",maxHeight:"100vh" }}>

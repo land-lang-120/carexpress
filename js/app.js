@@ -51,9 +51,15 @@ function App() {
     <div style={{ display:"flex",justifyContent:"center",background:"#DCDFE4",minHeight:"100vh" }}>
       <div style={{ width:"100%",maxWidth:430,minHeight:"100vh",background:C.bg,position:"relative",fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
         <div style={{ padding:"10px 16px 0",display:"flex",justifyContent:"space-between",alignItems:"center",background:C.bg,position:"sticky",top:0,zIndex:50 }}>
-          <span style={{ fontWeight:800,fontSize:16,color:C.text,letterSpacing:-.3 }}>CarExpress</span>
-          <div style={{ display:"flex",alignItems:"center",gap:10 }}>
-            <span style={{ fontSize:11,fontWeight:600,color:C.textSec }}>🇨🇲</span>
+          <div style={{ display:"flex",alignItems:"center",gap:8 }}>
+            <svg width="26" height="26" viewBox="0 0 32 32" fill="none">
+              <rect width="32" height="32" rx="9" fill="#1F2937"/>
+              <path d="M8 20.5h16M10 17l2-6h8l2 6" stroke="#25D366" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <circle cx="12" cy="21" r="2" fill="#25D366"/><circle cx="20" cy="21" r="2" fill="#25D366"/>
+              <path d="M16 8v3" stroke="#25D366" strokeWidth="1.5" strokeLinecap="round"/>
+              <circle cx="16" cy="7" r="1.5" fill="#25D366"/>
+            </svg>
+            <span style={{ fontWeight:800,fontSize:16,color:C.text,letterSpacing:-.3 }}>CarExpress</span>
           </div>
         </div>
         <div style={{ padding:"16px 16px 96px",overflowY:"auto",maxHeight:"100vh" }}>

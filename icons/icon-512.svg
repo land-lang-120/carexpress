@@ -1,4 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <rect width="512" height="512" rx="110" fill="#1F2937"/>
-  <text x="256" y="330" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-weight="800" font-size="192" fill="#25D366">CE</text>
+  <!-- Car body -->
+  <path d="M128 342h256M148 288l32-96h152l32 96" stroke="#25D366" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <!-- Wheels -->
+  <circle cx="192" cy="346" r="30" fill="#25D366"/>
+  <circle cx="320" cy="346" r="30" fill="#25D366"/>
+  <!-- Location pin -->
+  <path d="M256 128v48" stroke="#25D366" stroke-width="14" stroke-linecap="round"/>
+  <circle cx="256" cy="112" r="20" fill="#25D366"/>
+  <!-- Speed lines -->
+  <line x1="96" y1="268" x2="72" y2="268" stroke="#25D366" stroke-width="10" stroke-linecap="round" opacity=".5"/>
+  <line x1="96" y1="300" x2="60" y2="300" stroke="#25D366" stroke-width="10" stroke-linecap="round" opacity=".35"/>
+  <line x1="96" y1="332" x2="76" y2="332" stroke="#25D366" stroke-width="10" stroke-linecap="round" opacity=".2"/>
 </svg>
