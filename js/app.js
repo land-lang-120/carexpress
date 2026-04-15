@@ -6,14 +6,35 @@ function App() {
   const [results,   setResults]  = useState([]);
   const [activeTrip,setActiveTrip]= useState(null);
   const [bookedAt,  setBookedAt] = useState(null);
+  const [arrived,   setArrived]  = useState(false);
   const [mapOpen,   setMapOpen]  = useState(false);
   const [toast,     setToast]    = useState(null);
   const [cancelOpen,setCancelOpen]= useState(false);
   const [notifsOpen,setNotifsOpen]= useState(false);
 
   // Policy dialog state (show once per role)
-  const [policyDialog, setPolicyDialog] = useState(null); // "passenger" or "driver"
-  const [pendingAction, setPendingAction] = useState(null); // callback after accept
+  const [policyDialog, setPolicyDialog] = useState(null);
+  const [pendingAction, setPendingAction] = useState(null);
+
+  // Simulate arrival after trip duration
+  useEffect(() => {
+    if (!activeTrip || !bookedAt || arrived) return;
+    // Parse duration in minutes from trip.dur (e.g. "5h30" → 330 min)
+    const dur = activeTrip.dur || "5h00";
+    const hMatch = dur.match(/(\d+)h/), mMatch = dur.match(/h(\d+)/);
+    const totalMin = ((hMatch ? +hMatch[1] : 0) * 60) + (mMatch ? +mMatch[1] : 0);
+    // For demo: simulate arrival after 2 min (real would be totalMin * 60000)
+    const demoMs = 120000;
+    const t = setTimeout(() => {
+      setArrived(true);
+      setMapOpen(false);
+      setToast("Vous êtes arrivé à destination !");
+    }, demoMs);
+    return () => clearTimeout(t);
+  }, [activeTrip, bookedAt, arrived]);
+
+  // After arrival, auto-clear trip after 24h (chat stays via bookedAt)
+  // In real app this would be server-driven
 
   const checkPolicy = (role, action) => {
     const key = `ce_policy_${role}`;
@@ -41,6 +62,7 @@ function App() {
     checkPolicy("passenger", () => {
       setActiveTrip({ ...d, role:"passenger" });
       setBookedAt(Date.now());
+      setArrived(false);
       setScreen("home");
       setTab("home");
       setToast(`Réservé · ${d.from} → ${d.to}`);
@@ -56,12 +78,13 @@ function App() {
         verified: true,
         role: "driver",
         from: form.from, to: form.to,
-        dep: form.time, dur: "—",
+        dep: form.time, dur: form.duration || "5h00",
         price: +form.price || 0,
         pickup: form.pickup,
       };
       setActiveTrip(synthetic);
       setBookedAt(Date.now());
+      setArrived(false);
       setScreen("home");
       setToast("Trajet publié ! Vos boutons de suivi sont actifs.");
     });
@@ -71,7 +94,9 @@ function App() {
     const role = activeTrip?.role || "passenger";
     setActiveTrip(null);
     setBookedAt(null);
+    setArrived(false);
     setCancelOpen(false);
+    setTab("history");
     if (penalty) {
       setToast(role === "passenger"
         ? "Trajet annulé — sanctions appliquées"
@@ -87,10 +112,10 @@ function App() {
       return <NotificationsScreen onBack={()=>setNotifsOpen(false)}/>;
     }
     if (cancelOpen && activeTrip) {
-      return <CancelTripScreen trip={activeTrip} role={activeTrip.role||"passenger"} onBack={()=>setCancelOpen(false)} onConfirmCancel={handleCancelTrip}/>;
+      return <CancelTripScreen trip={activeTrip} role={activeTrip.role||"passenger"} onBack={()=>{setCancelOpen(false);setTab("history");}} onConfirmCancel={handleCancelTrip}/>;
     }
     if (tab !== "home") {
-      if (tab==="history")    return <HistoryScreen/>;
+      if (tab==="history")    return <HistoryScreen activeTrip={activeTrip} arrived={arrived} onCancelTrip={()=>setCancelOpen(true)}/>;
       if (tab==="favorites")  return <FavoritesScreen setTab={setTab}/>;
       if (tab==="profile")    return <ProfileScreen/>;
     }
@@ -99,6 +124,11 @@ function App() {
     if (screen==="results")   return <ResultsScreen onBack={()=>setScreen("passenger")} results={results} onBook={handleBook}/>;
     return <HomeScreen setScreen={s=>{ setTab("home"); setScreen(s); }}/>;
   };
+
+  // Show map button only if trip active and NOT arrived
+  const showMap = activeTrip && bookedAt && !arrived && tab === "home" && screen === "home";
+  // Show chat if trip exists and within 24h window (even after arrival)
+  const showChat = activeTrip && bookedAt && tab === "home" && screen === "home";
 
   return (
     <div style={{ display:"flex",justifyContent:"center",background:"#DCDFE4",minHeight:"100vh" }}>
@@ -129,22 +159,16 @@ function App() {
           {render()}
         </div>
         <BottomNav tab={tab} setTab={t=>{ setTab(t); if(t==="home") setScreen("home"); setCancelOpen(false); setNotifsOpen(false); }}/>
-        {activeTrip && bookedAt && tab === "home" && screen === "home" && !cancelOpen && (
-          <>
-            <FloatingStack trip={activeTrip} bookedAt={bookedAt} onMapOpen={()=>setMapOpen(true)}/>
-            {/* Cancel trip floating button */}
-            <button onClick={()=>setCancelOpen(true)}
-              style={{ position:"fixed",left:18,bottom:82,zIndex:200,width:48,height:48,borderRadius:"50%",background:C.dangerBg,border:`1.5px solid #FECACA`,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:C.danger,boxShadow:"0 4px 16px rgba(239,68,68,0.2)",transition:"transform .2s",fontFamily:"'Plus Jakarta Sans',sans-serif" }}
-              onMouseEnter={e=>e.currentTarget.style.transform="scale(1.08)"}
-              onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}>
-              {Ic.close}
-            </button>
-            <div style={{ position:"fixed",left:72,bottom:94,zIndex:200,background:C.dark,color:"#fff",padding:"4px 10px",borderRadius:8,fontSize:11,fontWeight:600,pointerEvents:"none",whiteSpace:"nowrap" }}>
-              Annuler
-            </div>
-          </>
+
+        {/* Floating buttons: map only when not arrived, chat always within 24h */}
+        {showChat && (
+          <div style={{ position:"fixed",right:18,bottom:82,zIndex:200,display:"flex",flexDirection:"column",alignItems:"center",gap:10 }}>
+            {showMap && <FloatingMapButton onOpen={()=>setMapOpen(true)} trip={activeTrip}/>}
+            <FloatingChat trip={activeTrip} bookedAt={bookedAt}/>
+          </div>
         )}
-        {mapOpen && activeTrip && (
+
+        {mapOpen && activeTrip && !arrived && (
           <MapOverlay trip={activeTrip} onClose={()=>setMapOpen(false)}/>
         )}
         {toast && <Toast message={toast} onClose={()=>setToast(null)}/>}

@@ -2,7 +2,7 @@
 
 function DriverScreen({ onBack, onSubmit }) {
   const [step, setStep] = useState(1);
-  const [form, setForm] = useState({ from:"Yaoundé",to:"Douala",pickup:"",date:"",time:"06:00",seats:"3",wc:2,food:1,shop:0,luggage:{small:true,large:false,xlarge:false},price:"3500",pay:"all" });
+  const [form, setForm] = useState({ from:"Yaoundé",to:"Douala",pickup:"",date:"",time:"06:00",duration:"5h30",seats:"3",wc:2,food:1,shop:0,luggage:{small:true,large:false,xlarge:false},price:"3500",pay:"all" });
   const set = (k,v) => setForm(p=>({...p,[k]:v}));
   const STEPS = ["Itinéraire","Conditions","Tarif"];
 
@@ -17,6 +17,11 @@ function DriverScreen({ onBack, onSubmit }) {
       <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:11 }}>
         <Field label="Date"  icon={Ic.cal}   type="date" value={form.date} onChange={v=>set("date",v)}/>
         <Field label="Heure" icon={Ic.clock} type="time" value={form.time} onChange={v=>set("time",v)}/>
+      </div>
+      <div>
+        <Sel label="Durée estimée du trajet" icon={Ic.clock} value={form.duration} onChange={v=>set("duration",v)}
+          options={["2h00","2h30","3h00","3h30","4h00","4h30","5h00","5h30","6h00","6h30","7h00","8h00","9h00","10h00","12h00"].map(v=>({ value:v,label:v }))}/>
+        <p style={{ fontSize:11,color:C.textSec,marginTop:6,lineHeight:1.5,paddingLeft:2 }}>Estimez la durée en tenant compte du trafic habituel sur cette route.</p>
       </div>
       <Sel label="Places disponibles" icon={Ic.users} value={form.seats} onChange={v=>set("seats",v)}
         options={["1","2","3","4","5","6","7","8"].map(v=>({ value:v,label:`${v} place${v>1?"s":""}` }))}/>
@@ -81,7 +86,7 @@ function DriverScreen({ onBack, onSubmit }) {
           </div>
         )}
         <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:8 }}>
-          {[["Départ",form.time],["Places",form.seats],["Prix",`${fmt(+form.price)} FCFA`],["Paiement",plab(form.pay)]].map(([l,v])=>(
+          {[["Départ",form.time],["Durée",form.duration],["Places",form.seats],["Prix",`${fmt(+form.price)} FCFA`],["Paiement",plab(form.pay)]].map(([l,v])=>(
             <div key={l} style={{ padding:"9px 11px",background:C.card,borderRadius:10,border:`1px solid ${C.border}` }}>
               <p style={{ fontSize:10,color:C.textSec,fontWeight:600 }}>{l}</p>
               <p style={{ fontSize:13,fontWeight:700,color:C.text,marginTop:2 }}>{v}</p>

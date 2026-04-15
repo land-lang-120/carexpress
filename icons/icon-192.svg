@@ -1,42 +1,27 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
   <rect width="192" height="192" rx="42" fill="#1F2937"/>
-
-  <!-- Road/route curved path -->
-  <path d="M38 143 C 68 113 105 90 158 68" stroke="rgba(255,255,255,0.08)" stroke-width="22" stroke-linecap="round" fill="none"/>
-  <path d="M38 143 C 68 113 105 90 158 68" stroke="#25D366" stroke-width="2.5" stroke-linecap="round" fill="none" stroke-dasharray="6 5"/>
-
-  <!-- Car body - side view -->
-  <g transform="translate(40, 68)">
-    <!-- Car bottom/chassis -->
-    <rect x="8" y="38" width="96" height="20" rx="5" fill="#25D366"/>
-    <!-- Car cabin/roof -->
-    <path d="M28 38 L40 18 L80 18 L92 38" fill="#25D366"/>
-    <!-- Windows -->
-    <path d="M42 20 L32 35 L58 35 Z" fill="#1F2937" opacity="0.5"/>
-    <path d="M62 20 L62 35 L90 35 L82 20 Z" fill="#1F2937" opacity="0.5"/>
-    <!-- Window divider -->
-    <line x1="60" y1="20" x2="60" y2="35" stroke="#25D366" stroke-width="2"/>
-    <!-- Headlight -->
-    <circle cx="100" cy="45" r="4" fill="#FBBF24"/>
-    <!-- Tail light -->
-    <circle cx="12" cy="45" r="3" fill="#EF4444"/>
-    <!-- Wheels -->
-    <circle cx="32" cy="58" r="11" fill="#111827"/>
-    <circle cx="32" cy="58" r="6" fill="#374151"/>
-    <circle cx="80" cy="58" r="11" fill="#111827"/>
-    <circle cx="80" cy="58" r="6" fill="#374151"/>
-  </g>
-
-  <!-- Location pin at destination -->
-  <g transform="translate(148, 52)">
-    <circle cx="0" cy="0" r="9" fill="#25D366" opacity="0.2"/>
-    <circle cx="0" cy="0" r="5" fill="#25D366"/>
-    <circle cx="0" cy="0" r="2" fill="#1F2937"/>
-  </g>
-
-  <!-- Location pin at start -->
-  <g transform="translate(38, 140)">
-    <circle cx="0" cy="0" r="6" fill="#25D366" opacity="0.2"/>
-    <circle cx="0" cy="0" r="3.5" fill="#25D366"/>
-  </g>
+  <!-- Route path -->
+  <path d="M42 144 C 72 114 108 90 156 66" stroke="rgba(255,255,255,0.06)" stroke-width="24" stroke-linecap="round" fill="none"/>
+  <path d="M42 144 C 72 114 108 90 156 66" stroke="#25D366" stroke-width="3.6" stroke-linecap="round" fill="none" stroke-dasharray="12 12"/>
+  <!-- Car body -->
+  <rect x="36" y="96" width="96" height="24" rx="7" fill="#25D366"/>
+  <path d="M60 96l12-30h36l12 30" fill="#25D366"/>
+  <!-- Windows -->
+  <path d="M75 69l-9 24h24z" fill="#1F2937" opacity="0.5"/>
+  <rect x="96" y="69" width="24" height="23" fill="#1F2937" opacity="0.5"/>
+  <!-- Window divider -->
+  <line x1="93" y1="69" x2="93" y2="93" stroke="#25D366" stroke-width="2.5"/>
+  <!-- Headlight -->
+  <circle cx="126" cy="105" r="4.5" fill="#FBBF24"/>
+  <!-- Tail light -->
+  <circle cx="40" cy="105" r="3.5" fill="#EF4444"/>
+  <!-- Wheels -->
+  <circle cx="60" cy="123" r="13.5" fill="#111827"/>
+  <circle cx="60" cy="123" r="7.5" fill="#374151"/>
+  <circle cx="108" cy="123" r="13.5" fill="#111827"/>
+  <circle cx="108" cy="123" r="7.5" fill="#374151"/>
+  <!-- Destination pin -->
+  <circle cx="156" cy="60" r="12" fill="#25D366" opacity="0.3"/>
+  <circle cx="156" cy="60" r="7.5" fill="#25D366"/>
+  <circle cx="156" cy="60" r="2.5" fill="#1F2937"/>
 </svg>

@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <link rel="manifest" href="manifest.json"/>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231F2937'/><rect x='5' y='16' width='20' height='6' rx='2' fill='%2325D366'/><path d='M9 16l3-7h8l3 7' fill='%2325D366'/><path d='M11 10l-2 5h5z' fill='%231F2937' opacity='.5'/><rect x='15' y='10' width='6' height='5' fill='%231F2937' opacity='.5'/><circle cx='10' cy='22' r='3' fill='%23111827'/><circle cx='10' cy='22' r='1.5' fill='%23374151'/><circle cx='22' cy='22' r='3' fill='%23111827'/><circle cx='22' cy='22' r='1.5' fill='%23374151'/><circle cx='25' cy='18' r='1.2' fill='%23FBBF24'/></svg>"/>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231F2937'/><path d='M7 24C12 19 18 15 26 11' stroke='rgba(255,255,255,0.06)' stroke-width='4' stroke-linecap='round' fill='none'/><path d='M7 24C12 19 18 15 26 11' stroke='%2325D366' stroke-width='0.6' stroke-linecap='round' fill='none' stroke-dasharray='2 2'/><rect x='6' y='16' width='16' height='4' rx='1.2' fill='%2325D366'/><path d='M10 16l2-5h6l2 5' fill='%2325D366'/><path d='M12.5 11.5l-1.5 4h4z' fill='%231F2937' opacity='.5'/><rect x='16' y='11.5' width='4' height='3.8' fill='%231F2937' opacity='.5'/><circle cx='21' cy='17.5' r='.7' fill='%23FBBF24'/><circle cx='10' cy='20.5' r='2.2' fill='%23111827'/><circle cx='10' cy='20.5' r='1.2' fill='%23374151'/><circle cx='18' cy='20.5' r='2.2' fill='%23111827'/><circle cx='18' cy='20.5' r='1.2' fill='%23374151'/><circle cx='26' cy='10' r='2' fill='%2325D366' opacity='.3'/><circle cx='26' cy='10' r='1.2' fill='%2325D366'/></svg>"/>
   <link rel="apple-touch-icon" href="icons/icon-192.svg"/>
 
   <!-- Global CSS -->
@@ -24,22 +24,18 @@
   <!-- Loading Screen -->
   <div id="ce-loading">
     <div class="loading-logo">
-      <svg width="80" height="80" viewBox="0 0 120 120" fill="none">
-        <rect width="120" height="120" rx="34" fill="#1F2937"/>
-        <!-- Route path -->
-        <path d="M25 90 C 45 70 70 55 100 40" stroke="rgba(255,255,255,0.06)" stroke-width="14" stroke-linecap="round" fill="none"/>
-        <path d="M25 90 C 45 70 70 55 100 40" stroke="#25D366" stroke-width="1.5" stroke-linecap="round" fill="none" stroke-dasharray="4 4"/>
-        <!-- Car body -->
-        <rect x="24" y="56" width="58" height="13" rx="3" fill="#25D366"/>
-        <path d="M36 56l7-16h20l7 16" fill="#25D366"/>
-        <path d="M44 42l-5 12h13z" fill="#1F2937" opacity="0.5"/>
-        <rect x="55" y="42" width="13" height="12" fill="#1F2937" opacity="0.5"/>
-        <circle cx="80" cy="60" r="2" fill="#FBBF24"/>
-        <circle cx="39" cy="70" r="7" fill="#111827"/><circle cx="39" cy="70" r="4" fill="#374151"/>
-        <circle cx="69" cy="70" r="7" fill="#111827"/><circle cx="69" cy="70" r="4" fill="#374151"/>
-        <!-- Destination pin -->
-        <circle cx="98" cy="35" r="6" fill="#25D366" opacity="0.3"/>
-        <circle cx="98" cy="35" r="3.5" fill="#25D366"/>
+      <svg width="80" height="80" viewBox="0 0 32 32" fill="none">
+        <rect width="32" height="32" rx="8" fill="#1F2937"/>
+        <path d="M7 24 C 12 19 18 15 26 11" stroke="rgba(255,255,255,0.06)" stroke-width="4" stroke-linecap="round" fill="none"/>
+        <path d="M7 24 C 12 19 18 15 26 11" stroke="#25D366" stroke-width="0.6" stroke-linecap="round" fill="none" stroke-dasharray="2 2"/>
+        <rect x="6" y="16" width="16" height="4" rx="1.2" fill="#25D366"/>
+        <path d="M10 16l2-5h6l2 5" fill="#25D366"/>
+        <path d="M12.5 11.5l-1.5 4h4z" fill="#1F2937" opacity="0.5"/>
+        <rect x="16" y="11.5" width="4" height="3.8" fill="#1F2937" opacity="0.5"/>
+        <circle cx="21" cy="17.5" r="0.7" fill="#FBBF24"/>
+        <circle cx="10" cy="20.5" r="2.2" fill="#111827"/><circle cx="10" cy="20.5" r="1.2" fill="#374151"/>
+        <circle cx="18" cy="20.5" r="2.2" fill="#111827"/><circle cx="18" cy="20.5" r="1.2" fill="#374151"/>
+        <circle cx="26" cy="10" r="2" fill="#25D366" opacity="0.3"/><circle cx="26" cy="10" r="1.2" fill="#25D366"/>
       </svg>
     </div>
     <p style="font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:#9CA3AF;font-weight:500;">
@@ -59,7 +55,7 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
   <!-- App Bundle -->
-  <script type="text/babel" data-presets="react" src="bundle.js?v=8"></script>
+  <script type="text/babel" data-presets="react" src="bundle.js?v=9"></script>
 
   <!-- Hide loading screen after React mounts -->
   <script>
