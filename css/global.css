@@ -1,0 +1,31 @@
+/* CarExpress — Global CSS */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body,#root{height:100%;width:100%}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#DCDFE4;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+input,select,textarea,button{font-family:'Plus Jakarta Sans',sans-serif}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:#E8EAED;border-radius:3px}
+
+/* Animations */
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(100%)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes ping{0%{transform:scale(1);opacity:.7}100%{transform:scale(2.4);opacity:0}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes popIn{0%{transform:scale(0.8);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* Loading screen */
+#ce-loading{
+  position:fixed;inset:0;z-index:9999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:#F5F6F8;gap:18px;
+}
+#ce-loading .loading-logo{animation:popIn .5s ease}
+#ce-loading .loading-bar-track{width:140px;height:3px;border-radius:3px;background:#E8EAED;overflow:hidden}
+#ce-loading .loading-bar-fill{height:100%;width:0;border-radius:3px;background:#25D366;animation:loadBar 2s ease forwards}
+@keyframes loadBar{0%{width:0}50%{width:60%}100%{width:100%}}
+#ce-loading.fade-out{opacity:0;transition:opacity .35s ease}

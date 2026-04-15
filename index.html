@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>CarExpress — Covoiturage Cameroun</title>
+  <meta name="description" content="Trouvez ou proposez un trajet de covoiturage au Cameroun. Yaoundé, Douala, Bafoussam et plus."/>
+  <meta name="theme-color" content="#1F2937"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'><rect width='30' height='30' rx='9' fill='%231F2937'/><text x='15' y='21' text-anchor='middle' font-family='sans-serif' font-weight='800' font-size='13' fill='%2325D366'>CE</text></svg>"/>
+  <link rel="apple-touch-icon" href="icons/icon-192.svg"/>
+
+  <!-- Global CSS -->
+  <link rel="stylesheet" href="css/global.css"/>
+
+  <style>
+    html, body { height: 100%; background: #DCDFE4; }
+  </style>
+</head>
+<body>
+
+  <!-- Loading Screen -->
+  <div id="ce-loading">
+    <div class="loading-logo">
+      <svg width="80" height="80" viewBox="0 0 120 120" fill="none">
+        <rect width="120" height="120" rx="34" fill="#1F2937"/>
+        <text x="60" y="78" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-weight="800" font-size="48" fill="#25D366">CE</text>
+      </svg>
+    </div>
+    <p style="font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:#9CA3AF;font-weight:500;">
+      Chargement en cours...
+    </p>
+    <div class="loading-bar-track">
+      <div class="loading-bar-fill"></div>
+    </div>
+  </div>
+
+  <!-- React root -->
+  <div id="root"></div>
+
+  <!-- React 18 + Babel CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- App Bundle -->
+  <script type="text/babel" data-presets="react" src="bundle.js?v=2"></script>
+
+  <!-- Hide loading screen after React mounts -->
+  <script>
+    (function checkReady() {
+      var root = document.getElementById('root');
+      var loader = document.getElementById('ce-loading');
+      if (root && root.innerHTML.length > 10 && loader) {
+        loader.classList.add('fade-out');
+        setTimeout(function() { loader.remove(); }, 400);
+      } else {
+        setTimeout(checkReady, 200);
+      }
+    })();
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(function() {});
+    }
+  </script>
+</body>
+</html>
