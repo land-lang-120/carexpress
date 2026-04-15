@@ -322,14 +322,9 @@ const Toast = ({ message, onClose }) => {
 function HomeScreen({ setScreen }) {
   return (
     <div style={{ animation:"fadeUp .35s ease" }}>
-      <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:26 }}>
-        <div>
-          <p style={{ fontSize:13,color:C.textSec,fontWeight:500 }}>Bonjour 👋</p>
-          <h1 style={{ fontWeight:800,fontSize:25,color:C.text,marginTop:2 }}>Où allons-nous ?</h1>
-        </div>
-        <button style={{ width:40,height:40,borderRadius:12,border:`1.5px solid ${C.border}`,background:C.card,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:C.dark }}>
-          {Ic.bell}
-        </button>
+      <div style={{ marginBottom:26 }}>
+        <p style={{ fontSize:13,color:C.textSec,fontWeight:500 }}>Bonjour 👋</p>
+        <h1 style={{ fontWeight:800,fontSize:25,color:C.text,marginTop:2 }}>Où allons-nous ?</h1>
       </div>
 
       <div style={{ display:"flex",gap:9,marginBottom:26 }}>
@@ -840,6 +835,487 @@ function BookingConfirm({ driver:d, onBack, onConfirm }) {
         En confirmant, vous acceptez les conditions d'utilisation de CarExpress.
         Annulation gratuite jusqu'à 1h avant le départ.
       </p>
+    </div>
+  );
+}
+
+
+/* ═══ js/cancellation.js ═══ */
+/* CarExpress — Cancellation Policy System */
+
+// ─── POLICY DIALOG (shown once per role) ───────────────────────────────────
+function CancellationPolicyDialog({ role, onAccept, onDecline }) {
+  // role: "passenger" or "driver"
+  const isPassenger = role === "passenger";
+
+  return (
+    <div style={{ position:"fixed",inset:0,zIndex:600,display:"flex",alignItems:"center",justifyContent:"center",background:"rgba(0,0,0,0.5)",backdropFilter:"blur(4px)",padding:16,animation:"fadeIn .25s ease" }}>
+      <div style={{ background:C.card,borderRadius:22,maxWidth:400,width:"100%",maxHeight:"85vh",overflowY:"auto",animation:"slideUp .3s ease",boxShadow:C.shadowLg }}>
+        <div style={{ padding:"24px 20px 0",textAlign:"center" }}>
+          <div style={{ width:64,height:64,borderRadius:18,background:"#FFFBEB",border:"1.5px solid #FDE68A",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px" }}>
+            <span style={{ fontSize:30 }}>⚖️</span>
+          </div>
+          <h3 style={{ fontWeight:800,fontSize:18,color:C.text,marginBottom:6 }}>Politique d'annulation</h3>
+          <p style={{ fontSize:13,color:C.textSec,lineHeight:1.6 }}>
+            Lisez attentivement avant de continuer
+          </p>
+        </div>
+
+        <div style={{ padding:"16px 20px" }}>
+          {/* Rule: 1 hour minimum */}
+          <div style={{ display:"flex",gap:11,alignItems:"flex-start",padding:"13px 14px",background:C.greenBg,borderRadius:13,border:"1px solid #A7F3D0",marginBottom:10 }}>
+            <span style={{ fontSize:18,flexShrink:0 }}>⏰</span>
+            <div>
+              <p style={{ fontWeight:700,fontSize:13,color:C.text }}>Annulation gratuite</p>
+              <p style={{ fontSize:12,color:C.textSec,lineHeight:1.6,marginTop:3 }}>
+                Vous pouvez annuler <strong style={{ color:C.green }}>gratuitement</strong> jusqu'à <strong style={{ color:C.text }}>1 heure avant le départ</strong>. Un message facultatif peut être envoyé à l'autre partie.
+              </p>
+            </div>
+          </div>
+
+          {/* Penalty section */}
+          <div style={{ display:"flex",gap:11,alignItems:"flex-start",padding:"13px 14px",background:C.dangerBg,borderRadius:13,border:"1px solid #FECACA",marginBottom:10 }}>
+            <span style={{ fontSize:18,flexShrink:0 }}>⚠️</span>
+            <div>
+              <p style={{ fontWeight:700,fontSize:13,color:C.danger }}>Annulation tardive (moins d'1h)</p>
+              <p style={{ fontSize:12,color:"#B91C1C",lineHeight:1.6,marginTop:3 }}>
+                {isPassenger
+                  ? "En cas d'annulation tardive, des sanctions seront appliquées pour compenser le chauffeur."
+                  : "En cas d'annulation tardive, des sanctions seront appliquées pour compenser vos passagers."
+                }
+              </p>
+            </div>
+          </div>
+
+          {/* Detailed penalties */}
+          <div style={{ padding:"14px",background:C.bg,borderRadius:13,border:`1px solid ${C.border}`,marginBottom:10 }}>
+            <p style={{ fontWeight:800,fontSize:12,color:C.text,textTransform:"uppercase",letterSpacing:.5,marginBottom:10 }}>
+              {isPassenger ? "Sanctions passager" : "Sanctions chauffeur"}
+            </p>
+            {isPassenger ? (
+              <>
+                <div style={{ display:"flex",gap:10,alignItems:"flex-start",marginBottom:10 }}>
+                  <span style={{ fontSize:15,flexShrink:0 }}>🔄</span>
+                  <div>
+                    <p style={{ fontWeight:700,fontSize:13,color:C.text }}>Points réinitialisés</p>
+                    <p style={{ fontSize:12,color:C.textSec,lineHeight:1.5,marginTop:2 }}>Tous vos points bonus CarExpress seront remis à zéro.</p>
+                  </div>
+                </div>
+                <div style={{ display:"flex",gap:10,alignItems:"flex-start" }}>
+                  <span style={{ fontSize:15,flexShrink:0 }}>💸</span>
+                  <div>
+                    <p style={{ fontWeight:700,fontSize:13,color:C.text }}>Surcharge de 30%</p>
+                    <p style={{ fontSize:12,color:C.textSec,lineHeight:1.5,marginTop:2 }}>
+                      Votre prochain trajet sur le même itinéraire sera majoré de <strong style={{ color:C.danger }}>30%</strong>. Ce montant sera payé en ligne et reversé intégralement au chauffeur impacté.
+                    </p>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{ display:"flex",gap:10,alignItems:"flex-start",marginBottom:10 }}>
+                  <span style={{ fontSize:15,flexShrink:0 }}>📉</span>
+                  <div>
+                    <p style={{ fontWeight:700,fontSize:13,color:C.text }}>Réduction forcée de 30%</p>
+                    <p style={{ fontSize:12,color:C.textSec,lineHeight:1.5,marginTop:2 }}>
+                      Votre prochain trajet sur le même itinéraire subira une <strong style={{ color:C.danger }}>réduction automatique de 30%</strong> sur votre tarif (au minimum le tarif proposé aux passagers impactés).
+                    </p>
+                  </div>
+                </div>
+                <div style={{ display:"flex",gap:10,alignItems:"flex-start" }}>
+                  <span style={{ fontSize:15,flexShrink:0 }}>🎁</span>
+                  <div>
+                    <p style={{ fontWeight:700,fontSize:13,color:C.text }}>Compensation passagers</p>
+                    <p style={{ fontSize:12,color:C.textSec,lineHeight:1.5,marginTop:2 }}>
+                      La différence sera reversée aux passagers impactés sous forme de <strong style={{ color:C.green }}>points bonus</strong> utilisables sur leurs prochains trajets.
+                    </p>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Mutual respect note */}
+          <div style={{ display:"flex",gap:10,alignItems:"flex-start",padding:"12px 14px",background:"#EFF6FF",borderRadius:13,border:"1px solid #BFDBFE" }}>
+            <span style={{ fontSize:15,flexShrink:0 }}>🤝</span>
+            <p style={{ fontSize:12,color:C.textSec,lineHeight:1.6 }}>
+              Cette politique protège <strong style={{ color:C.text }}>chauffeurs et passagers</strong>. Une annulation tardive cause des pertes réelles pour l'autre partie. Soyons responsables !
+            </p>
+          </div>
+        </div>
+
+        <div style={{ padding:"12px 20px 20px",display:"flex",flexDirection:"column",gap:8 }}>
+          <Btn variant="green" full onClick={onAccept}>
+            J'ai compris et j'accepte
+          </Btn>
+          <Btn variant="outline" full onClick={onDecline}>
+            Annuler
+          </Btn>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── CANCEL TRIP SCREEN ────────────────────────────────────────────────────
+function CancelTripScreen({ trip, role, onBack, onConfirmCancel }) {
+  const [message, setMessage] = useState("");
+  const [confirmed, setConfirmed] = useState(false);
+  const isPassenger = role === "passenger";
+
+  // Simulate: departure is in less than 1 hour (for demo, we show both states)
+  const [isLate] = useState(() => {
+    // In real app, compare trip.dep with current time
+    // For demo: randomly decide (or use a fixed value for showcase)
+    return true; // Show the penalty scenario
+  });
+
+  const penalty = isLate;
+  const surchargeAmount = Math.round((trip.price || 3500) * 0.3);
+
+  const handleCancel = () => {
+    setConfirmed(true);
+    setTimeout(() => onConfirmCancel({ message, penalty }), 2200);
+  };
+
+  if (confirmed) return (
+    <div style={{ animation:"fadeUp .3s ease",textAlign:"center",padding:"50px 20px" }}>
+      <div style={{ width:80,height:80,borderRadius:22,background:penalty?C.dangerBg:C.greenBg,border:`2px solid ${penalty?"#FECACA":"#A7F3D0"}`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 22px" }}>
+        <span style={{ fontSize:36 }}>{penalty?"⚠️":"✓"}</span>
+      </div>
+      <h3 style={{ fontWeight:800,fontSize:20,color:C.text,marginBottom:8 }}>Trajet annulé</h3>
+      <p style={{ fontSize:14,color:C.textSec,lineHeight:1.6,marginBottom:6 }}>{trip.from} → {trip.to}</p>
+      {penalty ? (
+        <div style={{ marginTop:16 }}>
+          <p style={{ fontSize:13,color:C.danger,fontWeight:700,marginBottom:8 }}>Sanctions appliquées :</p>
+          {isPassenger ? (
+            <>
+              <p style={{ fontSize:13,color:C.textSec }}>Points bonus : <strong style={{ color:C.danger }}>réinitialisés à 0</strong></p>
+              <p style={{ fontSize:13,color:C.textSec,marginTop:4 }}>Surcharge prochain trajet : <strong style={{ color:C.danger }}>+{fmt(surchargeAmount)} FCFA</strong></p>
+            </>
+          ) : (
+            <>
+              <p style={{ fontSize:13,color:C.textSec }}>Réduction forcée prochain trajet : <strong style={{ color:C.danger }}>−30%</strong></p>
+              <p style={{ fontSize:13,color:C.textSec,marginTop:4 }}>Compensation passagers : <strong style={{ color:C.green }}>{fmt(surchargeAmount)} pts</strong></p>
+            </>
+          )}
+        </div>
+      ) : (
+        <p style={{ fontSize:13,color:C.green,fontWeight:600,marginTop:10 }}>Aucune sanction — annulation dans les délais</p>
+      )}
+    </div>
+  );
+
+  return (
+    <div style={{ animation:"fadeUp .3s ease" }}>
+      <PageHdr title="Annuler le trajet" sub={`${trip.from} → ${trip.to}`} onBack={onBack}/>
+
+      {/* Time warning */}
+      {penalty ? (
+        <div style={{ display:"flex",gap:10,alignItems:"flex-start",padding:"13px 14px",background:C.dangerBg,borderRadius:13,border:"1px solid #FECACA",marginBottom:12 }}>
+          <span style={{ color:C.danger,display:"flex",flexShrink:0 }}>{Ic.warn}</span>
+          <div>
+            <p style={{ fontWeight:700,fontSize:13,color:C.danger }}>Annulation tardive</p>
+            <p style={{ fontSize:12,color:"#B91C1C",marginTop:3,lineHeight:1.5 }}>
+              Le départ est dans moins d'1 heure. Des <strong>sanctions seront appliquées</strong> conformément à la politique d'annulation.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div style={{ display:"flex",gap:10,alignItems:"flex-start",padding:"13px 14px",background:C.greenBg,borderRadius:13,border:"1px solid #A7F3D0",marginBottom:12 }}>
+          <span style={{ color:C.green,display:"flex",flexShrink:0 }}>{Ic.shield}</span>
+          <div>
+            <p style={{ fontWeight:700,fontSize:13,color:C.greenDark }}>Annulation gratuite</p>
+            <p style={{ fontSize:12,color:C.textSec,marginTop:3,lineHeight:1.5 }}>
+              Le départ est dans plus d'1 heure. Vous pouvez annuler sans aucune sanction.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Trip recap */}
+      <Card style={{ padding:16,marginBottom:12 }}>
+        <div style={{ display:"flex",gap:12,alignItems:"center",marginBottom:12 }}>
+          <div style={{ width:44,height:44,borderRadius:13,background:C.dark,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:14,color:"#fff",flexShrink:0 }}>{trip.ini}</div>
+          <div style={{ flex:1 }}>
+            <p style={{ fontWeight:800,fontSize:14,color:C.text }}>{trip.name}</p>
+            <p style={{ fontSize:12,color:C.textSec }}>{trip.vehicle}</p>
+          </div>
+          <div style={{ textAlign:"right" }}>
+            <p style={{ fontWeight:800,fontSize:15,color:C.text }}>{fmt(trip.price)} F</p>
+            <p style={{ fontSize:11,color:C.textSec }}>Départ {trip.dep}</p>
+          </div>
+        </div>
+        <div style={{ display:"flex",alignItems:"center",gap:8,padding:"9px 12px",background:C.bg,borderRadius:10 }}>
+          <span style={{ fontWeight:700,fontSize:13,color:C.text }}>{trip.from}</span>
+          <div style={{ flex:1,height:1,background:C.border }}/>
+          <span style={{ fontWeight:700,fontSize:13,color:C.text }}>{trip.to}</span>
+        </div>
+      </Card>
+
+      {/* Penalties breakdown if late */}
+      {penalty && (
+        <Card style={{ padding:16,marginBottom:12,border:"1.5px solid #FECACA" }}>
+          <p style={{ fontWeight:800,fontSize:13,color:C.danger,marginBottom:12 }}>Sanctions applicables</p>
+          {isPassenger ? (
+            <>
+              <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"9px 0" }}>
+                <div style={{ display:"flex",gap:8,alignItems:"center" }}>
+                  <span style={{ fontSize:14 }}>🔄</span>
+                  <span style={{ fontSize:13,color:C.text,fontWeight:600 }}>Points bonus</span>
+                </div>
+                <span style={{ fontWeight:800,fontSize:13,color:C.danger }}>Remis à 0</span>
+              </div>
+              <div style={{ height:1,background:C.border }}/>
+              <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"9px 0" }}>
+                <div style={{ display:"flex",gap:8,alignItems:"center" }}>
+                  <span style={{ fontSize:14 }}>💸</span>
+                  <span style={{ fontSize:13,color:C.text,fontWeight:600 }}>Surcharge prochain trajet</span>
+                </div>
+                <span style={{ fontWeight:800,fontSize:13,color:C.danger }}>+{fmt(surchargeAmount)} FCFA</span>
+              </div>
+              <div style={{ height:1,background:C.border }}/>
+              <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"9px 0" }}>
+                <div style={{ display:"flex",gap:8,alignItems:"center" }}>
+                  <span style={{ fontSize:14 }}>🔒</span>
+                  <span style={{ fontSize:13,color:C.text,fontWeight:600 }}>Paiement</span>
+                </div>
+                <span style={{ fontWeight:700,fontSize:12,color:C.textSec }}>En ligne uniquement</span>
+              </div>
+              <p style={{ fontSize:11,color:C.textSec,lineHeight:1.5,marginTop:6 }}>
+                Le montant de la surcharge sera reversé intégralement au chauffeur impacté.
+              </p>
+            </>
+          ) : (
+            <>
+              <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"9px 0" }}>
+                <div style={{ display:"flex",gap:8,alignItems:"center" }}>
+                  <span style={{ fontSize:14 }}>📉</span>
+                  <span style={{ fontSize:13,color:C.text,fontWeight:600 }}>Réduction forcée</span>
+                </div>
+                <span style={{ fontWeight:800,fontSize:13,color:C.danger }}>−30%</span>
+              </div>
+              <div style={{ height:1,background:C.border }}/>
+              <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"9px 0" }}>
+                <div style={{ display:"flex",gap:8,alignItems:"center" }}>
+                  <span style={{ fontSize:14 }}>🎁</span>
+                  <span style={{ fontSize:13,color:C.text,fontWeight:600 }}>Compensation passagers</span>
+                </div>
+                <span style={{ fontWeight:800,fontSize:13,color:C.green }}>{fmt(surchargeAmount)} pts</span>
+              </div>
+              <p style={{ fontSize:11,color:C.textSec,lineHeight:1.5,marginTop:6 }}>
+                La réduction sera appliquée automatiquement sur votre prochain trajet {trip.from} → {trip.to}. Les points seront crédités aux passagers.
+              </p>
+            </>
+          )}
+        </Card>
+      )}
+
+      {/* Optional message */}
+      <Card style={{ padding:16,marginBottom:14 }}>
+        <p style={{ fontWeight:800,fontSize:13,color:C.text,marginBottom:10 }}>Message (facultatif)</p>
+        <p style={{ fontSize:12,color:C.textSec,lineHeight:1.5,marginBottom:10 }}>
+          Expliquez brièvement la raison de votre annulation. Ce message sera envoyé {isPassenger?"au chauffeur":"à vos passagers"}.
+        </p>
+        <textarea
+          value={message}
+          onChange={e=>setMessage(e.target.value)}
+          placeholder={isPassenger?"Ex: Imprévu personnel, désolé pour le désagrément...":"Ex: Problème mécanique, impossible de partir aujourd'hui..."}
+          maxLength={200}
+          style={{
+            width:"100%",height:80,padding:"12px 14px",borderRadius:12,border:`1.5px solid ${C.border}`,background:C.bg,
+            fontSize:13,color:C.text,fontFamily:"'Plus Jakarta Sans',sans-serif",resize:"none",outline:"none",boxSizing:"border-box",
+            transition:"border-color .2s"
+          }}
+          onFocus={e=>e.target.style.borderColor=C.green}
+          onBlur={e=>e.target.style.borderColor=C.border}
+        />
+        <p style={{ fontSize:11,color:C.textLight,textAlign:"right",marginTop:4 }}>{message.length}/200</p>
+      </Card>
+
+      {/* Action buttons */}
+      <Btn variant="danger" full onClick={handleCancel} style={{ height:50,fontSize:14,borderRadius:13,marginBottom:8 }}>
+        {penalty?"Confirmer l'annulation (avec sanctions)":"Confirmer l'annulation"}
+      </Btn>
+      <Btn variant="outline" full onClick={onBack} style={{ borderRadius:13 }}>
+        Garder ma réservation
+      </Btn>
+    </div>
+  );
+}
+
+
+/* ═══ js/notifications.js ═══ */
+/* CarExpress — Notifications Screen */
+
+function NotificationsScreen({ onBack }) {
+  const [notifs] = useState([
+    {
+      id: 1, type: "reminder", read: false, time: "Il y a 15 min",
+      title: "Rappel — Départ dans 1h",
+      body: "Votre trajet Yaoundé → Douala avec Jean-Paul Mbarga part à 06:30. Préparez-vous !",
+      icon: "⏰", color: "#3B82F6", bg: "#EFF6FF", border: "#BFDBFE",
+      action: null,
+    },
+    {
+      id: 2, type: "reminder", read: false, time: "Il y a 30 min",
+      title: "Rappel — Départ dans 30 min",
+      body: "Plus que 30 minutes avant votre départ ! Rendez-vous au point de prise en charge : Carrefour Bastos.",
+      icon: "🚨", color: "#DC2626", bg: "#FEF2F2", border: "#FECACA",
+      action: null,
+    },
+    {
+      id: 3, type: "document", read: false, time: "Aujourd'hui",
+      title: "Document périmé — Visite technique",
+      body: "Votre visite technique a expiré le 01 Fév 2026. Votre statut Vérifié est suspendu. Renouvelez ce document pour restaurer votre badge.",
+      icon: "⚠️", color: "#D97706", bg: "#FFFBEB", border: "#FDE68A",
+      action: "verify",
+    },
+    {
+      id: 4, type: "message", read: false, time: "Hier",
+      title: "Message de Jean-Paul Mbarga",
+      body: "Bonjour, je confirme le départ demain à 06:30 depuis Carrefour Bastos. À demain !",
+      icon: "💬", color: "#25D366", bg: "#F0FBF4", border: "#A7F3D0",
+      action: "reply",
+    },
+    {
+      id: 5, type: "booking", read: true, time: "12 Mar 2026",
+      title: "Réservation confirmée",
+      body: "Votre trajet Yaoundé → Douala du 12 Mars est confirmé. Départ à 06:30 avec Jean-Paul Mbarga.",
+      icon: "✅", color: "#25D366", bg: "#F0FBF4", border: "#A7F3D0",
+      action: null,
+    },
+    {
+      id: 6, type: "cancellation", read: true, time: "10 Mar 2026",
+      title: "Annulation — Sanctions appliquées",
+      body: "Votre annulation tardive du trajet Bafoussam → Yaoundé a entraîné la réinitialisation de vos points et une surcharge de 30% sur votre prochain trajet.",
+      icon: "🚫", color: "#EF4444", bg: "#FEF2F2", border: "#FECACA",
+      action: null,
+    },
+    {
+      id: 7, type: "promo", read: true, time: "8 Mar 2026",
+      title: "Bonus de bienvenue",
+      body: "Bienvenue sur CarExpress ! Vous avez reçu 50 points bonus pour votre inscription. Utilisez-les sur votre prochain trajet.",
+      icon: "🎁", color: "#8B5CF6", bg: "#F5F3FF", border: "#DDD6FE",
+      action: null,
+    },
+    {
+      id: 8, type: "document", read: true, time: "5 Mar 2026",
+      title: "Document vérifié — Permis de conduire",
+      body: "Votre permis de conduire a été vérifié avec succès. Merci !",
+      icon: "✓", color: "#25D366", bg: "#F0FBF4", border: "#A7F3D0",
+      action: null,
+    },
+  ]);
+
+  const [replyingTo, setReplyingTo] = useState(null);
+  const [replyText, setReplyText] = useState("");
+  const [toast, setToast] = useState(null);
+
+  const unreadCount = notifs.filter(n => !n.read).length;
+
+  // ─── Reply sub-screen ───
+  if (replyingTo !== null) {
+    const notif = notifs.find(n => n.id === replyingTo);
+    return (
+      <div style={{ animation:"fadeUp .3s ease" }}>
+        <PageHdr title="Répondre" sub={notif?.title || ""} onBack={() => setReplyingTo(null)}/>
+        <Card style={{ padding:16,marginBottom:12 }}>
+          <div style={{ display:"flex",gap:10,alignItems:"flex-start",marginBottom:14 }}>
+            <div style={{ width:38,height:38,borderRadius:11,background:notif?.bg||C.bg,border:`1px solid ${notif?.border||C.border}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0 }}>
+              <span style={{ fontSize:16 }}>{notif?.icon}</span>
+            </div>
+            <div>
+              <p style={{ fontWeight:700,fontSize:13,color:C.text }}>{notif?.title}</p>
+              <p style={{ fontSize:12,color:C.textSec,marginTop:4,lineHeight:1.6 }}>{notif?.body}</p>
+            </div>
+          </div>
+        </Card>
+        <Card style={{ padding:16,marginBottom:14 }}>
+          <p style={{ fontWeight:700,fontSize:13,color:C.text,marginBottom:10 }}>Votre réponse</p>
+          <textarea
+            value={replyText}
+            onChange={e => setReplyText(e.target.value)}
+            placeholder="Écrivez votre réponse..."
+            maxLength={300}
+            style={{
+              width:"100%",height:100,padding:"12px 14px",borderRadius:12,border:`1.5px solid ${C.border}`,background:C.bg,
+              fontSize:13,color:C.text,fontFamily:"'Plus Jakarta Sans',sans-serif",resize:"none",outline:"none",boxSizing:"border-box",
+              transition:"border-color .2s"
+            }}
+            onFocus={e=>e.target.style.borderColor=C.green}
+            onBlur={e=>e.target.style.borderColor=C.border}
+          />
+          <p style={{ fontSize:11,color:C.textLight,textAlign:"right",marginTop:4 }}>{replyText.length}/300</p>
+        </Card>
+        <Btn variant="green" full onClick={() => { setReplyingTo(null); setReplyText(""); setToast("Message envoyé"); }} disabled={!replyText.trim()}>
+          {Ic.send} Envoyer la réponse
+        </Btn>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ animation:"fadeUp .3s ease" }}>
+      {toast && <Toast message={toast} onClose={() => setToast(null)}/>}
+      <PageHdr title="Notifications" sub={unreadCount > 0 ? `${unreadCount} non lue${unreadCount>1?"s":""}` : "Tout est à jour"} onBack={onBack}/>
+
+      {/* Unread section */}
+      {unreadCount > 0 && (
+        <>
+          <p style={{ fontSize:11,fontWeight:700,color:C.textSec,textTransform:"uppercase",letterSpacing:.5,marginBottom:8,paddingLeft:2 }}>Non lues</p>
+          <div style={{ display:"flex",flexDirection:"column",gap:8,marginBottom:18 }}>
+            {notifs.filter(n => !n.read).map(n => (
+              <Card key={n.id} style={{ padding:14,borderLeft:`4px solid ${n.color}`,cursor:n.action?"pointer":"default" }}
+                onClick={() => { if(n.action==="reply") setReplyingTo(n.id); }}>
+                <div style={{ display:"flex",gap:11,alignItems:"flex-start" }}>
+                  <div style={{ width:38,height:38,borderRadius:11,background:n.bg,border:`1px solid ${n.border}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0 }}>
+                    <span style={{ fontSize:16 }}>{n.icon}</span>
+                  </div>
+                  <div style={{ flex:1,minWidth:0 }}>
+                    <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:8,marginBottom:4 }}>
+                      <p style={{ fontWeight:700,fontSize:13,color:C.text }}>{n.title}</p>
+                      <span style={{ fontSize:10,color:C.textLight,fontWeight:600,flexShrink:0,whiteSpace:"nowrap" }}>{n.time}</span>
+                    </div>
+                    <p style={{ fontSize:12,color:C.textSec,lineHeight:1.6 }}>{n.body}</p>
+                    {n.action==="reply" && (
+                      <div style={{ display:"flex",alignItems:"center",gap:5,marginTop:8,color:C.green,fontSize:12,fontWeight:700 }}>
+                        {Ic.send} Répondre
+                      </div>
+                    )}
+                    {n.action==="verify" && (
+                      <div style={{ display:"flex",alignItems:"center",gap:5,marginTop:8,color:"#D97706",fontSize:12,fontWeight:700 }}>
+                        {Ic.shield} Mettre à jour le document
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Read section */}
+      <p style={{ fontSize:11,fontWeight:700,color:C.textSec,textTransform:"uppercase",letterSpacing:.5,marginBottom:8,paddingLeft:2 }}>Précédentes</p>
+      <div style={{ display:"flex",flexDirection:"column",gap:8,marginBottom:20 }}>
+        {notifs.filter(n => n.read).map(n => (
+          <Card key={n.id} style={{ padding:14,opacity:.7 }}>
+            <div style={{ display:"flex",gap:11,alignItems:"flex-start" }}>
+              <div style={{ width:34,height:34,borderRadius:10,background:C.bg,border:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0 }}>
+                <span style={{ fontSize:14 }}>{n.icon}</span>
+              </div>
+              <div style={{ flex:1,minWidth:0 }}>
+                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:8,marginBottom:3 }}>
+                  <p style={{ fontWeight:600,fontSize:13,color:C.text }}>{n.title}</p>
+                  <span style={{ fontSize:10,color:C.textLight,fontWeight:500,flexShrink:0,whiteSpace:"nowrap" }}>{n.time}</span>
+                </div>
+                <p style={{ fontSize:12,color:C.textSec,lineHeight:1.5 }}>{n.body}</p>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }
@@ -1842,34 +2318,87 @@ function App() {
   const [bookedAt,  setBookedAt] = useState(null);
   const [mapOpen,   setMapOpen]  = useState(false);
   const [toast,     setToast]    = useState(null);
+  const [cancelOpen,setCancelOpen]= useState(false);
+  const [notifsOpen,setNotifsOpen]= useState(false);
+
+  // Policy dialog state (show once per role)
+  const [policyDialog, setPolicyDialog] = useState(null); // "passenger" or "driver"
+  const [pendingAction, setPendingAction] = useState(null); // callback after accept
+
+  const checkPolicy = (role, action) => {
+    const key = `ce_policy_${role}`;
+    if (localStorage.getItem(key) === "1") {
+      action();
+    } else {
+      setPolicyDialog(role);
+      setPendingAction(() => action);
+    }
+  };
+
+  const acceptPolicy = () => {
+    localStorage.setItem(`ce_policy_${policyDialog}`, "1");
+    setPolicyDialog(null);
+    if (pendingAction) pendingAction();
+    setPendingAction(null);
+  };
+
+  const declinePolicy = () => {
+    setPolicyDialog(null);
+    setPendingAction(null);
+  };
 
   const handleBook = d => {
-    setActiveTrip({ ...d, role:"passenger" });
-    setBookedAt(Date.now());
-    setScreen("home");
-    setTab("home");
-    setToast(`Réservé · ${d.from} → ${d.to}`);
+    checkPolicy("passenger", () => {
+      setActiveTrip({ ...d, role:"passenger" });
+      setBookedAt(Date.now());
+      setScreen("home");
+      setTab("home");
+      setToast(`Réservé · ${d.from} → ${d.to}`);
+    });
   };
 
   const handleDriverSubmit = form => {
-    const synthetic = {
-      ...DRIVERS[0],
-      name: "Moi (Chauffeur)",
-      ini: "MOI",
-      verified: true,
-      role: "driver",
-      from: form.from, to: form.to,
-      dep: form.time, dur: "—",
-      price: +form.price || 0,
-      pickup: form.pickup,
-    };
-    setActiveTrip(synthetic);
-    setBookedAt(Date.now());
-    setScreen("home");
-    setToast("Trajet publié ! Vos boutons de suivi sont actifs.");
+    checkPolicy("driver", () => {
+      const synthetic = {
+        ...DRIVERS[0],
+        name: "Moi (Chauffeur)",
+        ini: "MOI",
+        verified: true,
+        role: "driver",
+        from: form.from, to: form.to,
+        dep: form.time, dur: "—",
+        price: +form.price || 0,
+        pickup: form.pickup,
+      };
+      setActiveTrip(synthetic);
+      setBookedAt(Date.now());
+      setScreen("home");
+      setToast("Trajet publié ! Vos boutons de suivi sont actifs.");
+    });
+  };
+
+  const handleCancelTrip = ({ message, penalty }) => {
+    const role = activeTrip?.role || "passenger";
+    setActiveTrip(null);
+    setBookedAt(null);
+    setCancelOpen(false);
+    if (penalty) {
+      setToast(role === "passenger"
+        ? "Trajet annulé — sanctions appliquées"
+        : "Trajet annulé — compensation passagers en cours"
+      );
+    } else {
+      setToast("Trajet annulé avec succès");
+    }
   };
 
   const render = () => {
+    if (notifsOpen) {
+      return <NotificationsScreen onBack={()=>setNotifsOpen(false)}/>;
+    }
+    if (cancelOpen && activeTrip) {
+      return <CancelTripScreen trip={activeTrip} role={activeTrip.role||"passenger"} onBack={()=>setCancelOpen(false)} onConfirmCancel={handleCancelTrip}/>;
+    }
     if (tab !== "home") {
       if (tab==="history")    return <HistoryScreen/>;
       if (tab==="favorites")  return <FavoritesScreen setTab={setTab}/>;
@@ -1887,26 +2416,53 @@ function App() {
         <div style={{ padding:"10px 16px 0",display:"flex",justifyContent:"space-between",alignItems:"center",background:C.bg,position:"sticky",top:0,zIndex:50 }}>
           <div style={{ display:"flex",alignItems:"center",gap:8 }}>
             <svg width="26" height="26" viewBox="0 0 32 32" fill="none">
-              <rect width="32" height="32" rx="9" fill="#1F2937"/>
-              <path d="M8 20.5h16M10 17l2-6h8l2 6" stroke="#25D366" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <circle cx="12" cy="21" r="2" fill="#25D366"/><circle cx="20" cy="21" r="2" fill="#25D366"/>
-              <path d="M16 8v3" stroke="#25D366" strokeWidth="1.5" strokeLinecap="round"/>
-              <circle cx="16" cy="7" r="1.5" fill="#25D366"/>
+              <rect width="32" height="32" rx="8" fill="#1F2937"/>
+              <path d="M7 24 C 12 19 18 15 26 11" stroke="rgba(255,255,255,0.06)" strokeWidth="4" strokeLinecap="round" fill="none"/>
+              <path d="M7 24 C 12 19 18 15 26 11" stroke="#25D366" strokeWidth="0.6" strokeLinecap="round" fill="none" strokeDasharray="2 2"/>
+              <rect x="6" y="16" width="16" height="4" rx="1.2" fill="#25D366"/>
+              <path d="M10 16l2-5h6l2 5" fill="#25D366"/>
+              <path d="M12.5 11.5l-1.5 4h4z" fill="#1F2937" opacity="0.5"/>
+              <rect x="16" y="11.5" width="4" height="3.8" fill="#1F2937" opacity="0.5"/>
+              <circle cx="21" cy="17.5" r="0.7" fill="#FBBF24"/>
+              <circle cx="10" cy="20.5" r="2.2" fill="#111827"/><circle cx="10" cy="20.5" r="1.2" fill="#374151"/>
+              <circle cx="18" cy="20.5" r="2.2" fill="#111827"/><circle cx="18" cy="20.5" r="1.2" fill="#374151"/>
+              <circle cx="26" cy="10" r="2" fill="#25D366" opacity="0.3"/><circle cx="26" cy="10" r="1.2" fill="#25D366"/>
             </svg>
             <span style={{ fontWeight:800,fontSize:16,color:C.text,letterSpacing:-.3 }}>CarExpress</span>
           </div>
+          <button onClick={()=>setNotifsOpen(true)} style={{ width:38,height:38,borderRadius:11,border:`1.5px solid ${C.border}`,background:C.card,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:C.dark,position:"relative",fontFamily:"'Plus Jakarta Sans',sans-serif" }}>
+            {Ic.bell}
+            <span style={{ position:"absolute",top:5,right:5,width:8,height:8,borderRadius:4,background:C.danger,border:"2px solid #fff" }}/>
+          </button>
         </div>
         <div style={{ padding:"16px 16px 96px",overflowY:"auto",maxHeight:"100vh" }}>
           {render()}
         </div>
-        <BottomNav tab={tab} setTab={t=>{ setTab(t); if(t==="home") setScreen("home"); }}/>
-        {activeTrip && bookedAt && tab === "home" && screen === "home" && (
-          <FloatingStack trip={activeTrip} bookedAt={bookedAt} onMapOpen={()=>setMapOpen(true)}/>
+        <BottomNav tab={tab} setTab={t=>{ setTab(t); if(t==="home") setScreen("home"); setCancelOpen(false); setNotifsOpen(false); }}/>
+        {activeTrip && bookedAt && tab === "home" && screen === "home" && !cancelOpen && (
+          <>
+            <FloatingStack trip={activeTrip} bookedAt={bookedAt} onMapOpen={()=>setMapOpen(true)}/>
+            {/* Cancel trip floating button */}
+            <button onClick={()=>setCancelOpen(true)}
+              style={{ position:"fixed",left:18,bottom:82,zIndex:200,width:48,height:48,borderRadius:"50%",background:C.dangerBg,border:`1.5px solid #FECACA`,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:C.danger,boxShadow:"0 4px 16px rgba(239,68,68,0.2)",transition:"transform .2s",fontFamily:"'Plus Jakarta Sans',sans-serif" }}
+              onMouseEnter={e=>e.currentTarget.style.transform="scale(1.08)"}
+              onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}>
+              {Ic.close}
+            </button>
+            <div style={{ position:"fixed",left:72,bottom:94,zIndex:200,background:C.dark,color:"#fff",padding:"4px 10px",borderRadius:8,fontSize:11,fontWeight:600,pointerEvents:"none",whiteSpace:"nowrap" }}>
+              Annuler
+            </div>
+          </>
         )}
         {mapOpen && activeTrip && (
           <MapOverlay trip={activeTrip} onClose={()=>setMapOpen(false)}/>
         )}
         {toast && <Toast message={toast} onClose={()=>setToast(null)}/>}
+
+        {/* Policy dialog overlay */}
+        {policyDialog && (
+          <CancellationPolicyDialog role={policyDialog} onAccept={acceptPolicy} onDecline={declinePolicy}/>
+        )}
       </div>
     </div>
   );

@@ -3,14 +3,9 @@
 function HomeScreen({ setScreen }) {
   return (
     <div style={{ animation:"fadeUp .35s ease" }}>
-      <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:26 }}>
-        <div>
-          <p style={{ fontSize:13,color:C.textSec,fontWeight:500 }}>Bonjour 👋</p>
-          <h1 style={{ fontWeight:800,fontSize:25,color:C.text,marginTop:2 }}>Où allons-nous ?</h1>
-        </div>
-        <button style={{ width:40,height:40,borderRadius:12,border:`1.5px solid ${C.border}`,background:C.card,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:C.dark }}>
-          {Ic.bell}
-        </button>
+      <div style={{ marginBottom:26 }}>
+        <p style={{ fontSize:13,color:C.textSec,fontWeight:500 }}>Bonjour 👋</p>
+        <h1 style={{ fontWeight:800,fontSize:25,color:C.text,marginTop:2 }}>Où allons-nous ?</h1>
       </div>
 
       <div style={{ display:"flex",gap:9,marginBottom:26 }}>

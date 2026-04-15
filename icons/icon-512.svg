@@ -1,15 +1,45 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <rect width="512" height="512" rx="110" fill="#1F2937"/>
-  <!-- Car body -->
-  <path d="M128 342h256M148 288l32-96h152l32 96" stroke="#25D366" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-  <!-- Wheels -->
-  <circle cx="192" cy="346" r="30" fill="#25D366"/>
-  <circle cx="320" cy="346" r="30" fill="#25D366"/>
-  <!-- Location pin -->
-  <path d="M256 128v48" stroke="#25D366" stroke-width="14" stroke-linecap="round"/>
-  <circle cx="256" cy="112" r="20" fill="#25D366"/>
-  <!-- Speed lines -->
-  <line x1="96" y1="268" x2="72" y2="268" stroke="#25D366" stroke-width="10" stroke-linecap="round" opacity=".5"/>
-  <line x1="96" y1="300" x2="60" y2="300" stroke="#25D366" stroke-width="10" stroke-linecap="round" opacity=".35"/>
-  <line x1="96" y1="332" x2="76" y2="332" stroke="#25D366" stroke-width="10" stroke-linecap="round" opacity=".2"/>
+
+  <!-- Road/route curved path -->
+  <path d="M100 380 C 180 300 280 240 420 180" stroke="rgba(255,255,255,0.08)" stroke-width="60" stroke-linecap="round" fill="none"/>
+  <path d="M100 380 C 180 300 280 240 420 180" stroke="#25D366" stroke-width="6" stroke-linecap="round" fill="none" stroke-dasharray="16 12"/>
+
+  <!-- Car body - side view -->
+  <g transform="translate(120, 200)">
+    <!-- Car bottom/chassis -->
+    <rect x="20" y="100" width="230" height="50" rx="12" fill="#25D366"/>
+    <!-- Car cabin/roof -->
+    <path d="M70 100 L100 50 L200 50 L230 100" fill="#25D366"/>
+    <!-- Windows -->
+    <path d="M105 55 L80 95 L145 95 Z" fill="#1F2937" opacity="0.6"/>
+    <path d="M155 55 L155 95 L225 95 L200 55 Z" fill="#1F2937" opacity="0.6"/>
+    <!-- Window divider -->
+    <line x1="150" y1="55" x2="150" y2="95" stroke="#25D366" stroke-width="4"/>
+    <!-- Headlight -->
+    <circle cx="245" cy="118" r="10" fill="#FBBF24"/>
+    <!-- Tail light -->
+    <circle cx="28" cy="118" r="8" fill="#EF4444"/>
+    <!-- Wheels -->
+    <circle cx="80" cy="152" r="28" fill="#111827"/>
+    <circle cx="80" cy="152" r="16" fill="#374151"/>
+    <circle cx="80" cy="152" r="6" fill="#6B7280"/>
+    <circle cx="200" cy="152" r="28" fill="#111827"/>
+    <circle cx="200" cy="152" r="16" fill="#374151"/>
+    <circle cx="200" cy="152" r="6" fill="#6B7280"/>
+  </g>
+
+  <!-- Location pin at destination -->
+  <g transform="translate(380, 120)">
+    <circle cx="0" cy="0" r="24" fill="#25D366" opacity="0.2"/>
+    <circle cx="0" cy="0" r="14" fill="#25D366"/>
+    <circle cx="0" cy="0" r="5" fill="#1F2937"/>
+  </g>
+
+  <!-- Location pin at start -->
+  <g transform="translate(100, 370)">
+    <circle cx="0" cy="0" r="16" fill="#25D366" opacity="0.2"/>
+    <circle cx="0" cy="0" r="9" fill="#25D366"/>
+    <circle cx="0" cy="0" r="3" fill="#1F2937"/>
+  </g>
 </svg>

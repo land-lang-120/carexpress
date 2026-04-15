@@ -13,6 +13,8 @@ const FILES = [
   'js/driver.js',
   'js/passenger.js',
   'js/results.js',
+  'js/cancellation.js',
+  'js/notifications.js',
   'js/history.js',
   'js/favorites.js',
   'js/profile.js',
