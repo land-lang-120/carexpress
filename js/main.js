@@ -8,6 +8,12 @@ function CarExpressRoot() {
     setOnboarded(true);
   };
 
+  // Signal au loading screen (dans index.html) qu'on a fini de mount.
+  // Plus propre que le poll innerHTML toutes les 200ms.
+  useEffect(() => {
+    window.dispatchEvent(new Event('ce-ready'));
+  }, []);
+
   if (!onboarded) return <OnboardingScreen onDone={handleDone}/>;
   return <App />;
 }
